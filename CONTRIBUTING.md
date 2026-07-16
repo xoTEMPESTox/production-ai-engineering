@@ -9,6 +9,10 @@ This is a curated teaching repository for **Production AI Engineering**. Each ch
 3. **Keep lesson source files aligned**. Any change to a chapter's code (`example.py`, `tests.py`) or READMEs should be verified locally by running `npm run build` inside the `web` folder.
 4. **Target the correct paths**. Make changes in the `part-X-folders/` directories, not generated files.
 5. **Disclose AI assistance**. Using an agent is fine. Say so, and make sure you have read and stand behind the change.
+6. **Satisfy the Core Rule for Additions**. Every new concept or lesson added to the repository must satisfy three conditions:
+   * It solves a real engineering problem encountered in production or commonly faced by AI teams.
+   * It includes an original implementation, runnable example, and explanation of tradeoffs.
+   * It is integrated into at least one complete system example (in `part-3-complete-systems/`) where it demonstrates practical value.
 
 ## What gets closed without detailed review
 
@@ -20,6 +24,13 @@ To keep the review queue useful, we close:
 
 Focused, clearly explained contributions from people who have actually worked with the material are always welcome!
 
+## 🔄 The Ingestion Loop & Private Notes
+
+To ensure high-quality curation while maintaining a stream of fresh production insights, we utilize a `notes/` feedback loop. 
+* **Inbox**: Save raw blog links, Reddit posts, incident logs, stack traces, and local screenshots under `notes/incoming/` as Markdown (`.md`) files. This directory is committed to GitHub to preserve state but is excluded from the Next.js visualizer build.
+* **Weekly Ingestion**: Once a week, review the inbox notes (manually or via a coding agent) to determine where the insights belong in the curriculum. Update the corresponding lessons, python examples, and complete system references, then delete the notes from the inbox.
+
+---
 
 # 贡献指南
 
@@ -32,6 +43,10 @@ Focused, clearly explained contributions from people who have actually worked wi
 3. **保持课程文件对齐**。对某章代码（`example.py`、`tests.py`）或文档的改动，必须在 `web` 目录下运行 `npm run build` 确保本地构建通过。
 4. **定位正确的路径**。在具体的 `part-X-folders/` 路径下进行修改，而不是修改生成的文件。
 5. **声明 AI 协助**。用 agent 没问题，但请予以说明，并确保你已读过、也认可这份改动。
+6. **符合核心新增原则**。每一个引入到仓库中的新概念或新课时，都必须满足以下三个条件：
+   * 必须解决一个在生产环境或 AI 团队中普遍遇到的实际工程问题。
+   * 必须包含原创的实现、可运行的示例，以及对架构权衡（tradeoffs）的解释。
+   * 必须被集成到至少一个完整的系统案例中（在 `part-3-complete-systems/` 下）以展示其在实际应用中的价值。
 
 ## 哪些会被直接关闭（不做详细评审）
 
@@ -40,3 +55,9 @@ Focused, clearly explained contributions from people who have actually worked wi
 3. 没有对应 issue、或把刻意的简化当成 bug 来“修”的 PR。
 
 真正用过这份材料、聚焦且讲清理由的贡献，我们始终欢迎。
+
+## 🔄 建议采纳周期与私有笔记 (Notes)
+
+为了在保障高质量内容沉淀的同时能吸纳最新的生产一线洞察，我们使用了 `notes/` 反馈循环。
+* **收集箱 (Inbox)**：将平时看到的文章链接、Reddit 讨论、生产事故日志、异常堆栈和截图保存至 `notes/incoming/` 目录下的 Markdown (`.md`) 文件中。该目录会被提交到 GitHub 以同步状态，但在 Next.js 前端打包时会被完全忽略。
+* **每周消化**：每周一次（手动或通过编程 Agent）复盘收集箱中的笔记，判断其在课程大纲中的归宿。更新相应的课时、Python 示例以及系统综合案例，最后将已消化的笔记从收集箱中删除。
