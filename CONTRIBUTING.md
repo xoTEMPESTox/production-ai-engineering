@@ -1,14 +1,14 @@
 # Contributing
 
-This is a curated teaching repository. Each chapter (`sNN_topic/`) builds one idea on top of the last, and the code is deliberately minimal. The simplifications are intentional, so the lesson stays legible. Contributions are welcome when they serve that goal.
+This is a curated teaching repository for **Production AI Engineering**. Each chapter builds one concept on top of the last, and the code is deliberately minimal yet robust. The simplifications are intentional, so the lesson stays legible. Contributions are welcome when they serve that goal.
 
 ## Before opening a PR
 
-1. Tie it to a specific issue. Say what is wrong and why your change is the right fix. One PR addresses one issue.
-2. Keep teaching code minimal. Do not add production hardening, defensive parsing, error handling layers, abstractions, or a test framework unless the chapter is specifically about that. A simplification that looks like a bug is often deliberate, so ask in an issue first.
-3. Keep the three languages in sync. Any change to a chapter's `code.py` or a README must be reflected in all three language READMEs in that chapter folder, with the code blocks identical across them.
-4. Target the current course files (`sNN_topic/`), not legacy mirrors.
-5. Disclose AI assistance. Using an agent is fine. Say so, and make sure you have read and stand behind the change.
+1. **Tie it to a specific issue**. Explain what is wrong and why your change is the right fix. One PR addresses one issue.
+2. **Keep teaching code minimal but typed**. Do not add excessive defensive parsing or other abstraction layers unless the chapter is specifically about that. A simplification that looks like a bug is often deliberate, so ask in an issue first.
+3. **Keep lesson source files aligned**. Any change to a chapter's code (`example.py`, `tests.py`) or READMEs should be verified locally by running `npm run build` inside the `web` folder.
+4. **Target the correct paths**. Make changes in the `part-X-folders/` directories, not generated files.
+5. **Disclose AI assistance**. Using an agent is fine. Say so, and make sure you have read and stand behind the change.
 
 ## What gets closed without detailed review
 
@@ -18,25 +18,25 @@ To keep the review queue useful, we close:
 2. Changes that expand a chapter's scope or structure against the teaching design.
 3. PRs not tied to an issue, or that restate a deliberate simplification as a bug.
 
-Focused, clearly explained contributions from people who have actually worked with the material are always welcome.
+Focused, clearly explained contributions from people who have actually worked with the material are always welcome!
 
 
 # 贡献指南
 
-这是一个**教学仓库**。每一章(`sNN_topic/`)在上一章的基础上只讲清一个点,代码刻意保持最简。简化是有意为之,为的是让讲解保持清晰。欢迎服务于这个目标的贡献。
+这是一个**教学仓库**，专注于 **Production AI Engineering**。每一章在上一章的基础上只讲清一个点，代码刻意保持最简且坚固。简化是有意为之，为的是让讲解保持清晰。欢迎服务于这个目标的贡献。
 
 ## 提 PR 之前
 
-1. 对应一个具体 issue。说清问题是什么、为什么你的改法是对的。一个 PR 只解决一个问题。
-2. 教学代码保持最简。不要加生产级的防御解析、错误处理层、抽象或测试框架,除非这一章本身就在讲这些。某处"像 bug"的简化往往是刻意的,先在 issue 里问一声。
-3. 三语保持同步。对某章 `code.py` 或 README 的改动,必须同步到该章目录下三种语言的 README,且其中代码块完全一致。
-4. 改现行课程文件(`sNN_topic/`),不要改旧的镜像目录。
-5. 声明 AI 协助。用 agent 没问题,但请说明,并确保你读过、也认可这份改动。
+1. **对应一个具体 issue**。说清问题是什么、为什么你的改法是对的。一个 PR 只解决一个问题。
+2. **教学代码保持最简且带类型约束**。不要添加多余的防御解析或其它抽象层，除非这一章本身就在讲这些。某处“像 bug”的简化往往是刻意的，请先在 issue 里询问。
+3. **保持课程文件对齐**。对某章代码（`example.py`、`tests.py`）或文档的改动，必须在 `web` 目录下运行 `npm run build` 确保本地构建通过。
+4. **定位正确的路径**。在具体的 `part-X-folders/` 路径下进行修改，而不是修改生成的文件。
+5. **声明 AI 协助**。用 agent 没问题，但请予以说明，并确保你已读过、也认可这份改动。
 
-## 哪些会被直接关闭(不做详细评审)
+## 哪些会被直接关闭（不做详细评审）
 
-1. 在大量互不相关的仓库里一次性批量提交、由 agent 生成的 PR。作者自己都没参与的代码,我们无法负责任地评审。
+1. 在大量互不相关的仓库里一次性批量提交、由 agent 生成的 PR。作者自己都没参与的代码，我们无法负责任地评审。
 2. 让某章范围或结构超出教学设计的改动。
-3. 没有对应 issue、或把刻意的简化当成 bug 来"修"的 PR。
+3. 没有对应 issue、或把刻意的简化当成 bug 来“修”的 PR。
 
-真正用过这份材料、聚焦且讲清理由的贡献,我们始终欢迎。
+真正用过这份材料、聚焦且讲清理由的贡献，我们始终欢迎。

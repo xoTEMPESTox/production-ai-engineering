@@ -72,64 +72,73 @@ Each lesson in Part 1 and Part 2 contains:
 
 ## 📚 Final Curriculum
 
+> [!NOTE]
+> **Roadmap Status**: Only **Lesson 01 (State Representation)** is fully implemented in production-grade code. All other chapters currently contain conceptual code skeletons and folder placeholders outlining our curriculum path. They will be progressively populated.
+>
+> **Multilingual Disclaimer**: All non-English versions of the documentation site (Chinese and Japanese) are machine/LLM-generated translations of the core English curriculum.
+
 ### PART I — Foundations (Learn AI Systems)
 Goal: Learn how an AI system thinks before learning how it survives production. These chapters are under 200 LOC, runnable, concept-focused, and highly educational.
 
-| # | Chapter | Key Focus / Primitives |
-|---|---------|------------------------|
-| 01 | [State Representation](part-1-foundations/01-state) | Thread-safety, copy-on-write immutability & audit rollbacks |
-| 02 | [The Agent Loop](part-1-foundations/02-agent-loop) | Model-independent core execution cycles |
-| 03 | [Prompting & Structured Output](part-1-foundations/03-prompting-structured-output) | Schema enforcement, Pydantic parsing & format corrections |
-| 04 | [Tool Calling](part-1-foundations/04-tool-calling) | Dynamic tool registry validation & dispatcher |
-| 05 | [Memory System](part-1-foundations/05-memory) | Short-term context compaction & long-term episodic retrieval |
-| 06 | [Planning & Task Decomposition](part-1-foundations/06-planning-task-decomposition) | DAG step coordinators & dynamic goal breaking |
-| 07 | [Multi-Agent Coordination](part-1-foundations/07-multi-agent-coordination) | Decoupled worker agents, routers & messaging |
-| 08 | [Human Approval (HITL)](part-1-foundations/08-human-approval) | Pausable execution gates & approval mechanisms |
-| 09 | [Evaluation & Self Reflection](part-1-foundations/09-evaluation-self-reflection) | Automated LLM-as-a-judge quality evaluations |
-| 10 | [Scheduling & Long Running Tasks](part-1-foundations/10-scheduling-long-running-tasks) | Durable cron loops and deferred check-ins |
-| 11 | [Async Execution](part-1-foundations/11-async-execution) | Concurrency and parallel step resolution using `asyncio` |
-| 12 | [Event Driven Agents](part-1-foundations/12-event-driven-agents) | Event streaming, pub/sub buses & event logging |
-| 13 | [State Machines](part-1-foundations/13-state-machines) | Strict finite state transitions to guard against loop drift |
-| 14 | [Error Handling](part-1-foundations/14-error-handling) | Exception classification pipelines |
-| 15 | [Persistence](part-1-foundations/15-persistence) | Serialization interfaces for saving states to disk |
+| # | Chapter | Key Focus / Primitives | Status |
+|---|---------|------------------------|--------|
+| 01 | [State Representation](part-1-foundations/01-state) | Thread-safety, copy-on-write immutability & audit rollbacks | ✅ Completed |
+| 02 | [The Agent Loop](part-1-foundations/02-agent-loop) | Model-independent core execution cycles | ⏳ Skeleton |
+| 03 | [Prompting & Structured Output](part-1-foundations/03-prompting-structured-output) | Schema enforcement, Pydantic parsing & format corrections | ⏳ Skeleton |
+| 04 | [Tool Calling](part-1-foundations/04-tool-calling) | Dynamic tool registry validation & dispatcher | ⏳ Skeleton |
+| 05 | [Memory System](part-1-foundations/05-memory) | Short-term context compaction & long-term episodic retrieval | ⏳ Skeleton |
+| 06 | [Planning & Task Decomposition](part-1-foundations/06-planning-task-decomposition) | DAG step coordinators & dynamic goal breaking | ⏳ Skeleton |
+| 07 | [Multi-Agent Coordination](part-1-foundations/07-multi-agent-coordination) | Decoupled worker agents, routers & messaging | ⏳ Skeleton |
+| 08 | [Human Approval (HITL)](part-1-foundations/08-human-approval) | Pausable execution gates & approval mechanisms | ⏳ Skeleton |
+| 09 | [Evaluation & Self Reflection](part-1-foundations/09-evaluation-self-reflection) | Automated LLM-as-a-judge quality evaluations | ⏳ Skeleton |
+| 10 | [Scheduling & Long Running Tasks](part-1-foundations/10-scheduling-long-running-tasks) | Durable cron loops and deferred check-ins | ⏳ Skeleton |
+| 11 | [Async Execution](part-1-foundations/11-async-execution) | Concurrency and parallel step resolution using `asyncio` | ⏳ Skeleton |
+| 12 | [Event Driven Agents](part-1-foundations/12-event-driven-agents) | Event streaming, pub/sub buses & event logging | ⏳ Skeleton |
+| 13 | [State Machines](part-1-foundations/13-state-machines) | Strict finite state transitions to guard against loop drift | ⏳ Skeleton |
+| 14 | [Error Handling](part-1-foundations/14-error-handling) | Exception classification pipelines | ⏳ Skeleton |
+| 15 | [Persistence](part-1-foundations/15-persistence) | Serialization interfaces for saving states to disk | ⏳ Skeleton |
 
 ---
 
 ### PART II — Production Patterns
 Goal: Learn how to scale, secure, monitor, and configure agents in a production environment.
 
-| # | Chapter | Key Focus / Primitives |
-|---|---------|------------------------|
-| 16 | [Retry Patterns](part-2-production-patterns/16-retry-patterns) | Transient error backoff, jitter, and classification |
-| 17 | [Background Workers](part-2-production-patterns/17-background-workers) | Asynchronous process offloading & worker thread pooling |
-| 18 | [Redis Checkpointing](part-2-production-patterns/18-redis-checkpointing) | Running checkpoint states to Redis for recovery resumes |
-| 19 | [PostgreSQL State Store](part-2-production-patterns/19-postgresql-state-store) | ACID relational database transaction logs |
-| 20 | [Queues](part-2-production-patterns/20-queues) | Task distribution brokers and consumer backpressure |
-| 21 | [Streaming](part-2-production-patterns/21-streaming) | SSE token-by-token client streaming APIs |
-| 22 | [Observability](part-2-production-patterns/22-observability) | OpenTelemetry instrumentation, spans & prompt cost tracing |
-| 23 | [Docker](part-2-production-patterns/23-docker) | Multi-stage Docker environments for runtime parity |
-| 24 | [Deployment](part-2-production-patterns/24-deployment) | Stateless app servers and separated DB architectures |
-| 25 | [Configuration](part-2-production-patterns/25-configuration) | Strong-typed environment config parsers & secrets |
-| 26 | [Monitoring](part-2-production-patterns/26-monitoring) | Real-time Prometheus metrics of cost, latency, & errors |
-| 27 | [Evaluation Pipelines](part-2-production-patterns/27-evaluation-pipelines) | Automated CI/CD prompt regression datasets |
-| 28 | [Cost Tracking](part-2-production-patterns/28-cost-tracking) | Session budget guards & cumulative pricing calculators |
-| 29 | [Security](part-2-production-patterns/29-security) | Isolated subshells, shell sandboxes, & prompt inspection |
-| 30 | [Scaling](part-2-production-patterns/30-scaling) | High-concurrency horizontal scaling setup |
+| # | Chapter | Key Focus / Primitives | Status |
+|---|---------|------------------------|--------|
+| 16 | [Retry Patterns](part-2-production-patterns/16-retry-patterns) | Transient error backoff, jitter, and classification | ⏳ Skeleton |
+| 17 | [Background Workers](part-2-production-patterns/17-background-workers) | Asynchronous process offloading & worker thread pooling | ⏳ Skeleton |
+| 18 | [Redis Checkpointing](part-2-production-patterns/18-redis-checkpointing) | Running checkpoint states to Redis for recovery resumes | ⏳ Skeleton |
+| 19 | [PostgreSQL State Store](part-2-production-patterns/19-postgresql-state-store) | ACID relational database transaction logs | ⏳ Skeleton |
+| 20 | [Queues](part-2-production-patterns/20-queues) | Task distribution brokers and consumer backpressure | ⏳ Skeleton |
+| 21 | [Streaming](part-2-production-patterns/21-streaming) | SSE token-by-token client streaming APIs | ⏳ Skeleton |
+| 22 | [Observability](part-2-production-patterns/22-observability) | OpenTelemetry instrumentation, spans & prompt cost tracing | ⏳ Skeleton |
+| 23 | [Docker](part-2-production-patterns/23-docker) | Multi-stage Docker environments for runtime parity | ⏳ Skeleton |
+| 24 | [Deployment](part-2-production-patterns/24-deployment) | Stateless app servers and separated DB architectures | ⏳ Skeleton |
+| 25 | [Configuration](part-2-production-patterns/25-configuration) | Strong-typed environment config parsers & secrets | ⏳ Skeleton |
+| 26 | [Monitoring](part-2-production-patterns/26-monitoring) | Real-time Prometheus metrics of cost, latency, & errors | ⏳ Skeleton |
+| 27 | [Evaluation Pipelines](part-2-production-patterns/27-evaluation-pipelines) | Automated CI/CD prompt regression datasets | ⏳ Skeleton |
+| 28 | [Cost Tracking](part-2-production-patterns/28-cost-tracking) | Session budget guards & cumulative pricing calculators | ⏳ Skeleton |
+| 29 | [Security](part-2-production-patterns/29-security) | Isolated subshells, shell sandboxes, & prompt inspection | ⏳ Skeleton |
+| 30 | [Scaling](part-2-production-patterns/30-scaling) | High-concurrency horizontal scaling setup | ⏳ Skeleton |
 
 ---
 
 ### PART III — Complete Systems
 Goal: Reference implementations of complete production applications built using the foundations and patterns.
 
-* **[Healthcare Platform](part-3-complete-systems/healthcare-platform) (Flagship ⭐)**: HIPAA-inspired agent integrating intake queues, Redis checkpoints, human review gates, and PostgreSQL audits.
-* **[Customer Support](part-3-complete-systems/customer-support)**: Omnichannel routing engine, stateful context resume, and live human handoff layers.
-* **[Research Assistant](part-3-complete-systems/research-assistant)**: Parallelized web/document search with automatic fact-checking synthesizers.
-* **[Coding Agent](part-3-complete-systems/coding-agent)**: Git worktree sandboxing, test-driven self-repair loops, and file operations.
+| System | Key Focus / Primitives | Status |
+|--------|------------------------|--------|
+| **[Healthcare Platform](part-3-complete-systems/healthcare-platform) (Flagship ⭐)** | HIPAA-inspired agent integrating intake queues, Redis checkpoints, human review gates, and PostgreSQL audits | ⏳ Skeleton |
+| **[Customer Support](part-3-complete-systems/customer-support)** | Omnichannel routing engine, stateful context resume, and live human handoff layers | ⏳ Skeleton |
+| **[Research Assistant](part-3-complete-systems/research-assistant)** | Parallelized web/document search with automatic fact-checking synthesizers | ⏳ Skeleton |
+| **[Coding Agent](part-3-complete-systems/coding-agent)** | Git worktree sandboxing, test-driven self-repair loops, and file operations | ⏳ Skeleton |
 
 ---
 
 ### PART IV — Infrastructure
-* **[Local Compose Deployment](part-4-infrastructure/local-compose-deployment)**: Docker Compose specifications spinning up Redis caching, PostgreSQL databases, worker queues, Swagger endpoints, and real-time dashboard telemetry.
+| System | Key Focus / Primitives | Status |
+|--------|------------------------|--------|
+| **[Local Compose Deployment](part-4-infrastructure/local-compose-deployment)** | Docker Compose specifications spinning up Redis caching, PostgreSQL databases, worker queues, Swagger endpoints, and real-time dashboard telemetry | ⏳ Skeleton |
 
 ---
 
@@ -194,4 +203,4 @@ Once the site successfully pings and identifies the backend container, the stati
 
 ## 🤝 Acknowledgements
 
-This project's educational website and progressive learning experience were inspired by the excellent **Learn Claude Code** project. Their progressive documentation style heavily influenced the organization of this repository. All curriculum, code, examples, architecture diagrams, and production implementations in this repository are original and focused on production-grade AI engineering.
+This project's educational website and progressive learning experience were inspired by the excellent [Learn Claude Code](https://github.com/shareAI-lab/learn-claude-code) project. Their progressive documentation style heavily influenced the organization of this repository. All curriculum, code, examples, architecture diagrams, and production implementations in this repository are original and focused on production-grade AI engineering.
