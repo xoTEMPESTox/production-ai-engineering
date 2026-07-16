@@ -1,0 +1,237 @@
+import type { AgentLayer } from "@/types/agent-data";
+
+export const VERSION_ORDER = [
+  "f01",
+  "f02",
+  "f03",
+  "f04",
+  "f05",
+  "f06",
+  "f07",
+  "f08",
+  "f09",
+  "f10",
+  "p01",
+  "p02",
+  "p03",
+  "p04",
+  "p05",
+  "p06",
+  "p07",
+  "p08",
+  "p09",
+  "p10",
+  "p11",
+  "c01",
+] as const;
+
+export const LEARNING_PATH = VERSION_ORDER;
+
+export type VersionId = typeof LEARNING_PATH[number];
+
+export const VERSION_META: Record<string, {
+  title: string;
+  subtitle: string;
+  coreAddition: string;
+  keyInsight: string;
+  layer: AgentLayer;
+  prevVersion: string | null;
+}> = {
+  f01: {
+    title: "State Representation",
+    subtitle: "The Foundation of Agent Execution",
+    coreAddition: "Immutable State Logs",
+    keyInsight: "Robust agents require immutable state logs to support concurrency, trace execution, and recover from failures.",
+    layer: "foundations",
+    prevVersion: null,
+  },
+  f02: {
+    title: "Agent Loop",
+    subtitle: "Controlling Execution Cycles",
+    coreAddition: "Autonomous Execution Cycle",
+    keyInsight: "The core loop coordinates calling LLMs, interpreting tools, and driving progression until completion.",
+    layer: "foundations",
+    prevVersion: "f01",
+  },
+  f03: {
+    title: "Tool Calling",
+    subtitle: "Interacting with the World",
+    coreAddition: "Schema-Validated Dispatcher",
+    keyInsight: "Standardizing tool execution requires explicit type signatures, validation, and a centralized dispatcher.",
+    layer: "foundations",
+    prevVersion: "f02",
+  },
+  f04: {
+    title: "Structured Output",
+    subtitle: "Enforcing Schema Reliability",
+    coreAddition: "Pydantic Schema Parser",
+    keyInsight: "LLMs must output standardized JSON matching validation rules for machine-to-machine reliability.",
+    layer: "foundations",
+    prevVersion: "f03",
+  },
+  f05: {
+    title: "Memory System",
+    subtitle: "Preserving Crucial Context",
+    coreAddition: "Semantic Key-Value Memories",
+    keyInsight: "An agent needs distinct memory layers: short-term context compaction and durable episodic storage.",
+    layer: "foundations",
+    prevVersion: "f04",
+  },
+  f06: {
+    title: "Planner",
+    subtitle: "Strategic Execution Routing",
+    coreAddition: "DAG Step Coordinator",
+    keyInsight: "Complex goals require a planner to decompose objectives into ordered tasks before execution begins.",
+    layer: "foundations",
+    prevVersion: "f05",
+  },
+  f07: {
+    title: "Multi-Agent System",
+    subtitle: "Collaborative Orchestration",
+    coreAddition: "Router & Worker Mesh",
+    keyInsight: "Specialized agents coordinates and delegates tasks to each other via structured communication layers.",
+    layer: "foundations",
+    prevVersion: "f06",
+  },
+  f08: {
+    title: "Evaluation",
+    subtitle: "Continuous Performance Verification",
+    coreAddition: "LLM-as-a-Judge Pipeline",
+    keyInsight: "Production quality demands automated test suites validating outputs against accuracy and safety matrices.",
+    layer: "foundations",
+    prevVersion: "f07",
+  },
+  f09: {
+    title: "Human Approval",
+    subtitle: "Placing Humans in the Loop",
+    coreAddition: "Interactive Approval Gates",
+    keyInsight: "High-risk tool invocations must trigger state pause gates awaiting human explicit authorization.",
+    layer: "foundations",
+    prevVersion: "f08",
+  },
+  f10: {
+    title: "Scheduling",
+    subtitle: "Temporal Task Execution",
+    coreAddition: "Asynchronous Cron Scheduler",
+    keyInsight: "Durable scheduled loops enable agents to run periodic check-ins, monitoring, and time-driven workflows.",
+    layer: "foundations",
+    prevVersion: "f09",
+  },
+  p01: {
+    title: "Retry Policies",
+    subtitle: "Handling Flaky LLMs and APIs",
+    coreAddition: "Exponential Backoff",
+    keyInsight: "Transient errors are mitigated by classifying exceptions and executing retries with exponential backoffs.",
+    layer: "patterns",
+    prevVersion: "f10",
+  },
+  p02: {
+    title: "Checkpointing",
+    subtitle: "Saving Run Progress Durably",
+    coreAddition: "Disk/Database Persistence",
+    keyInsight: "Periodic checkpoint persistence allows agents to resume after failure without losing progress.",
+    layer: "patterns",
+    prevVersion: "p01",
+  },
+  p03: {
+    title: "Message Queues",
+    subtitle: "Decoupling Agent Processes",
+    coreAddition: "Task Queue Integration",
+    keyInsight: "Decoupling execution through queues guarantees reliability, backpressure management, and horizontal scalability.",
+    layer: "patterns",
+    prevVersion: "p02",
+  },
+  p04: {
+    title: "Redis Caching",
+    subtitle: "High-Speed Memory & State Cache",
+    coreAddition: "In-Memory Database Connection",
+    keyInsight: "Redis serves as an ephemeral cache layer for agent state sharing, lock mechanisms, and rate limits.",
+    layer: "patterns",
+    prevVersion: "p03",
+  },
+  p05: {
+    title: "PostgreSQL Store",
+    subtitle: "Relational Agent Memory & Audit Trails",
+    coreAddition: "Relational Ledger Schema",
+    keyInsight: "PostgreSQL provides durable, ACID-compliant persistence for execution graphs, audit trails, and histories.",
+    layer: "patterns",
+    prevVersion: "p04",
+  },
+  p06: {
+    title: "Async Processing",
+    subtitle: "Non-blocking Execution Flow",
+    coreAddition: "Python asyncio Run Loop",
+    keyInsight: "Using async processing allows a single thread to coordinate thousands of long-running concurrent network calls.",
+    layer: "patterns",
+    prevVersion: "p05",
+  },
+  p07: {
+    title: "Streaming API",
+    subtitle: "Improving User Perceived Latency",
+    coreAddition: "SSE (Server-Sent Events) Outputs",
+    keyInsight: "Streaming token-by-token outputs in real-time makes systems feel significantly more responsive and interactive.",
+    layer: "patterns",
+    prevVersion: "p06",
+  },
+  p08: {
+    title: "Observability",
+    subtitle: "Tracing LLM and Tool Pipelines",
+    coreAddition: "OTel Tracing & Spans",
+    keyInsight: "OpenTelemetry integration provides visual call-stacks showing prompts, tokens, latency, and cost per execution.",
+    layer: "patterns",
+    prevVersion: "p07",
+  },
+  p09: {
+    title: "Docker Integration",
+    subtitle: "Packaging the Platform",
+    coreAddition: "Multi-stage Dockerfile",
+    keyInsight: "Docker containerization guarantees environment parity between development workspace and production servers.",
+    layer: "patterns",
+    prevVersion: "p08",
+  },
+  p10: {
+    title: "Monitoring & Logging",
+    subtitle: "Tracking Runs in Production",
+    coreAddition: "Structured JSON Logger",
+    keyInsight: "Structured JSON logs and metric dashboards track prompt costs, tool error rates, and failure frequencies.",
+    layer: "patterns",
+    prevVersion: "p09",
+  },
+  p11: {
+    title: "State Recovery",
+    subtitle: "Self-Healing Agent Harnesses",
+    coreAddition: "Graceful Resume Logic",
+    keyInsight: "Agents should self-heal from network dropouts and task failures by reading from the last checkpoint.",
+    layer: "patterns",
+    prevVersion: "p10",
+  },
+  c01: {
+    title: "Healthcare Platform",
+    subtitle: "Complete Enterprise Agent Architecture",
+    coreAddition: "Full Microservices Mesh",
+    keyInsight: "The flagship Healthcare system integrates all concepts: FastAPI, Docker Compose, Postgres, Redis, and workers.",
+    layer: "systems",
+    prevVersion: "p11",
+  },
+};
+
+export const LAYERS = [
+  {
+    id: "foundations" as const,
+    label: "Part 1: Foundations",
+    color: "#3B82F6",
+    versions: ["f01", "f02", "f03", "f04", "f05", "f06", "f07", "f08", "f09", "f10"],
+  },
+  {
+    id: "patterns" as const,
+    label: "Part 2: Production Patterns",
+    color: "#10B981",
+    versions: ["p01", "p02", "p03", "p04", "p05", "p06", "p07", "p08", "p09", "p10", "p11"],
+  },
+  {
+    id: "systems" as const,
+    label: "Part 3: Complete Systems",
+    color: "#8B5CF6",
+    versions: ["c01"],
+  },
+] as const;

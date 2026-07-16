@@ -1,0 +1,710 @@
+{
+  "versions": [
+    {
+      "id": "f01",
+      "filename": "foundations/01-state/example.py",
+      "title": "State Representation",
+      "subtitle": "The Foundation of Agent Execution",
+      "loc": 100,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Immutable State Logs",
+      "keyInsight": "Robust agents require immutable state logs to support concurrency, trace execution, and recover from failures.",
+      "classes": [
+        {
+          "name": "Message",
+          "startLine": 8,
+          "endLine": 15
+        },
+        {
+          "name": "AgentState",
+          "startLine": 16,
+          "endLine": 24
+        },
+        {
+          "name": "StateStore",
+          "startLine": 25,
+          "endLine": 125
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "import copy\nimport threading\nfrom dataclasses import dataclass, field\nfrom typing import Any, Dict, List, Optional\n\n\n@dataclass(frozen=True)\nclass Message:\n    \"\"\"Represents a conversation message. Immutable by design.\"\"\"\n    role: str\n    content: str\n    metadata: Dict[str, Any] = field(default_factory=dict)\n\n\n@dataclass(frozen=True)\nclass AgentState:\n    \"\"\"Immutable representation of the complete agent state at a specific instant.\"\"\"\n    messages: List[Message] = field(default_factory=list)\n    current_task: Optional[str] = None\n    execution_plan: List[str] = field(default_factory=list)\n    metadata: Dict[str, Any] = field(default_factory=dict)\n    version: int = 0\n\n\nclass StateStore:\n    \"\"\"\n    Thread-safe store managing the lifecycle of an Agent's state.\n    Ensures state transitions are atomic, versioned, and reversible.\n    \"\"\"\n    def __init__(self, initial_state: Optional[AgentState] = None) -> None:\n        self._lock = threading.Lock()\n        self._current_state = initial_state or AgentState()\n        self._history: List[AgentState] = [self._current_state]\n\n    def get_state(self) -> AgentState:\n        \"\"\"Retrieves the current immutable snapshot of the agent state.\"\"\"\n        with self._lock:\n            return self._current_state\n\n    def update(self, **kwargs: Any) -> AgentState:\n        \"\"\"\n        Applies a functional update to transition the state.\n        \n        Args:\n            **kwargs: State attributes to update. Lists and dicts are deep-copied.\n            \n        Returns:\n            The new transitioned AgentState.\n        \"\"\"\n        with self._lock:\n            # Extract current state fields\n            messages = self._current_state.messages\n            current_task = self._current_state.current_task\n            execution_plan = self._current_state.execution_plan\n            metadata = self._current_state.metadata\n\n            # Process updates with copy-on-write pattern to prevent pointer leaks\n            if \"messages\" in kwargs:\n                raw_messages = kwargs[\"messages\"]\n                messages = [\n                    m if isinstance(m, Message) else Message(**m)\n                    for m in raw_messages\n                ]\n            if \"current_task\" in kwargs:\n                current_task = kwargs[\"current_task\"]\n            if \"execution_plan\" in kwargs:\n                execution_plan = copy.deepcopy(kwargs[\"execution_plan\"])\n            if \"metadata\" in kwargs:\n                # Merge metadata updates rather than replacing entirely\n                merged_meta = copy.deepcopy(metadata)\n                merged_meta.update(copy.deepcopy(kwargs[\"metadata\"]))\n                metadata = merged_meta\n\n            new_version = self._current_state.version + 1\n            new_state = AgentState(\n                messages=messages,\n                current_task=current_task,\n                execution_plan=execution_plan,\n                metadata=metadata,\n                version=new_version\n            )\n\n            # Update pointer and append to history log for audit and rollback capabilities\n            self._current_state = new_state\n            self._history.append(new_state)\n            return new_state\n\n    def rollback(self, target_version: int) -> AgentState:\n        \"\"\"\n        Reverts the agent state to a previous version.\n        Rollback is recorded as a new state transition version to preserve audit trail.\n        \n        Args:\n            target_version: The version number to roll back to.\n            \n        Returns:\n            The new transitioned state (with state matching target_version but incremented version number).\n        \"\"\"\n        with self._lock:\n            if target_version < 0 or target_version >= len(self._history):\n                raise ValueError(\n                    f\"Invalid target version {target_version}. History contains \"\n                    f\"versions 0 to {len(self._history) - 1}.\"\n                )\n\n            historical_state = self._history[target_version]\n            new_version = self._current_state.version + 1\n\n            new_state = AgentState(\n                messages=list(historical_state.messages),\n                current_task=historical_state.current_task,\n                execution_plan=list(historical_state.execution_plan),\n                metadata=copy.deepcopy(historical_state.metadata),\n                version=new_version\n            )\n\n            self._current_state = new_state\n            self._history.append(new_state)\n            return new_state\n\n    def get_history(self) -> List[AgentState]:\n        \"\"\"Returns a snapshot copy of the full transaction log history.\"\"\"\n        with self._lock:\n            return list(self._history)\n",
+      "images": []
+    },
+    {
+      "id": "f02",
+      "filename": "foundations/02-agent-loop/example.py",
+      "title": "Agent Loop",
+      "subtitle": "Controlling Execution Cycles",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Autonomous Execution Cycle",
+      "keyInsight": "The core loop coordinates calling LLMs, interpreting tools, and driving progression until completion.",
+      "classes": [
+        {
+          "name": "02Agentloop",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 02 Agent Loop\r\nclass 02Agentloop:\r\n    \"\"\"Production implementation placeholder for 02 Agent Loop.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 02 Agent Loop operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "f03",
+      "filename": "foundations/03-tool-calling/example.py",
+      "title": "Tool Calling",
+      "subtitle": "Interacting with the World",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Schema-Validated Dispatcher",
+      "keyInsight": "Standardizing tool execution requires explicit type signatures, validation, and a centralized dispatcher.",
+      "classes": [
+        {
+          "name": "03Toolcalling",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 03 Tool Calling\r\nclass 03Toolcalling:\r\n    \"\"\"Production implementation placeholder for 03 Tool Calling.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 03 Tool Calling operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "f04",
+      "filename": "foundations/04-structured-output/example.py",
+      "title": "Structured Output",
+      "subtitle": "Enforcing Schema Reliability",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Pydantic Schema Parser",
+      "keyInsight": "LLMs must output standardized JSON matching validation rules for machine-to-machine reliability.",
+      "classes": [
+        {
+          "name": "04Structuredoutput",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 04 Structured Output\r\nclass 04Structuredoutput:\r\n    \"\"\"Production implementation placeholder for 04 Structured Output.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 04 Structured Output operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "f05",
+      "filename": "foundations/05-memory/example.py",
+      "title": "Memory System",
+      "subtitle": "Preserving Crucial Context",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Semantic Key-Value Memories",
+      "keyInsight": "An agent needs distinct memory layers: short-term context compaction and durable episodic storage.",
+      "classes": [
+        {
+          "name": "05Memory",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 05 Memory\r\nclass 05Memory:\r\n    \"\"\"Production implementation placeholder for 05 Memory.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 05 Memory operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "f06",
+      "filename": "foundations/06-planner/example.py",
+      "title": "Planner",
+      "subtitle": "Strategic Execution Routing",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "DAG Step Coordinator",
+      "keyInsight": "Complex goals require a planner to decompose objectives into ordered tasks before execution begins.",
+      "classes": [
+        {
+          "name": "06Planner",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 06 Planner\r\nclass 06Planner:\r\n    \"\"\"Production implementation placeholder for 06 Planner.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 06 Planner operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "f07",
+      "filename": "foundations/07-multi-agent/example.py",
+      "title": "Multi-Agent System",
+      "subtitle": "Collaborative Orchestration",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Router & Worker Mesh",
+      "keyInsight": "Specialized agents coordinates and delegates tasks to each other via structured communication layers.",
+      "classes": [
+        {
+          "name": "07Multiagent",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 07 Multi Agent\r\nclass 07Multiagent:\r\n    \"\"\"Production implementation placeholder for 07 Multi Agent.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 07 Multi Agent operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "f08",
+      "filename": "foundations/08-evaluation/example.py",
+      "title": "Evaluation",
+      "subtitle": "Continuous Performance Verification",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "LLM-as-a-Judge Pipeline",
+      "keyInsight": "Production quality demands automated test suites validating outputs against accuracy and safety matrices.",
+      "classes": [
+        {
+          "name": "08Evaluation",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 08 Evaluation\r\nclass 08Evaluation:\r\n    \"\"\"Production implementation placeholder for 08 Evaluation.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 08 Evaluation operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "f09",
+      "filename": "foundations/09-human-approval/example.py",
+      "title": "Human Approval",
+      "subtitle": "Placing Humans in the Loop",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Interactive Approval Gates",
+      "keyInsight": "High-risk tool invocations must trigger state pause gates awaiting human explicit authorization.",
+      "classes": [
+        {
+          "name": "09Humanapproval",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 09 Human Approval\r\nclass 09Humanapproval:\r\n    \"\"\"Production implementation placeholder for 09 Human Approval.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 09 Human Approval operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "f10",
+      "filename": "foundations/10-scheduling/example.py",
+      "title": "Scheduling",
+      "subtitle": "Temporal Task Execution",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Asynchronous Cron Scheduler",
+      "keyInsight": "Durable scheduled loops enable agents to run periodic check-ins, monitoring, and time-driven workflows.",
+      "classes": [
+        {
+          "name": "10Scheduling",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "foundations",
+      "source": "# Placeholder class for 10 Scheduling\r\nclass 10Scheduling:\r\n    \"\"\"Production implementation placeholder for 10 Scheduling.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing 10 Scheduling operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p01",
+      "filename": "patterns/retry/example.py",
+      "title": "Retry Policies",
+      "subtitle": "Handling Flaky LLMs and APIs",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Exponential Backoff",
+      "keyInsight": "Transient errors are mitigated by classifying exceptions and executing retries with exponential backoffs.",
+      "classes": [
+        {
+          "name": "Retry",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Retry\r\nclass Retry:\r\n    \"\"\"Production implementation placeholder for Retry.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Retry operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p02",
+      "filename": "patterns/checkpointing/example.py",
+      "title": "Checkpointing",
+      "subtitle": "Saving Run Progress Durably",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Disk/Database Persistence",
+      "keyInsight": "Periodic checkpoint persistence allows agents to resume after failure without losing progress.",
+      "classes": [
+        {
+          "name": "Checkpointing",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Checkpointing\r\nclass Checkpointing:\r\n    \"\"\"Production implementation placeholder for Checkpointing.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Checkpointing operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p03",
+      "filename": "patterns/queues/example.py",
+      "title": "Message Queues",
+      "subtitle": "Decoupling Agent Processes",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Task Queue Integration",
+      "keyInsight": "Decoupling execution through queues guarantees reliability, backpressure management, and horizontal scalability.",
+      "classes": [
+        {
+          "name": "Queues",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Queues\r\nclass Queues:\r\n    \"\"\"Production implementation placeholder for Queues.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Queues operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p04",
+      "filename": "patterns/redis/example.py",
+      "title": "Redis Caching",
+      "subtitle": "High-Speed Memory & State Cache",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "In-Memory Database Connection",
+      "keyInsight": "Redis serves as an ephemeral cache layer for agent state sharing, lock mechanisms, and rate limits.",
+      "classes": [
+        {
+          "name": "Redis",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Redis\r\nclass Redis:\r\n    \"\"\"Production implementation placeholder for Redis.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Redis operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p05",
+      "filename": "patterns/postgresql/example.py",
+      "title": "PostgreSQL Store",
+      "subtitle": "Relational Agent Memory & Audit Trails",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Relational Ledger Schema",
+      "keyInsight": "PostgreSQL provides durable, ACID-compliant persistence for execution graphs, audit trails, and histories.",
+      "classes": [
+        {
+          "name": "Postgresql",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Postgresql\r\nclass Postgresql:\r\n    \"\"\"Production implementation placeholder for Postgresql.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Postgresql operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p06",
+      "filename": "patterns/async-processing/example.py",
+      "title": "Async Processing",
+      "subtitle": "Non-blocking Execution Flow",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Python asyncio Run Loop",
+      "keyInsight": "Using async processing allows a single thread to coordinate thousands of long-running concurrent network calls.",
+      "classes": [
+        {
+          "name": "Asyncprocessing",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Async Processing\r\nclass Asyncprocessing:\r\n    \"\"\"Production implementation placeholder for Async Processing.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Async Processing operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p07",
+      "filename": "patterns/streaming/example.py",
+      "title": "Streaming API",
+      "subtitle": "Improving User Perceived Latency",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "SSE (Server-Sent Events) Outputs",
+      "keyInsight": "Streaming token-by-token outputs in real-time makes systems feel significantly more responsive and interactive.",
+      "classes": [
+        {
+          "name": "Streaming",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Streaming\r\nclass Streaming:\r\n    \"\"\"Production implementation placeholder for Streaming.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Streaming operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p08",
+      "filename": "patterns/observability/example.py",
+      "title": "Observability",
+      "subtitle": "Tracing LLM and Tool Pipelines",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "OTel Tracing & Spans",
+      "keyInsight": "OpenTelemetry integration provides visual call-stacks showing prompts, tokens, latency, and cost per execution.",
+      "classes": [
+        {
+          "name": "Observability",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Observability\r\nclass Observability:\r\n    \"\"\"Production implementation placeholder for Observability.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Observability operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p09",
+      "filename": "patterns/docker/example.py",
+      "title": "Docker Integration",
+      "subtitle": "Packaging the Platform",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Multi-stage Dockerfile",
+      "keyInsight": "Docker containerization guarantees environment parity between development workspace and production servers.",
+      "classes": [
+        {
+          "name": "Docker",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Docker\r\nclass Docker:\r\n    \"\"\"Production implementation placeholder for Docker.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Docker operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p10",
+      "filename": "patterns/monitoring/example.py",
+      "title": "Monitoring & Logging",
+      "subtitle": "Tracking Runs in Production",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Structured JSON Logger",
+      "keyInsight": "Structured JSON logs and metric dashboards track prompt costs, tool error rates, and failure frequencies.",
+      "classes": [
+        {
+          "name": "Monitoring",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for Monitoring\r\nclass Monitoring:\r\n    \"\"\"Production implementation placeholder for Monitoring.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Monitoring operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "p11",
+      "filename": "patterns/state-recovery/example.py",
+      "title": "State Recovery",
+      "subtitle": "Self-Healing Agent Harnesses",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Graceful Resume Logic",
+      "keyInsight": "Agents should self-heal from network dropouts and task failures by reading from the last checkpoint.",
+      "classes": [
+        {
+          "name": "Staterecovery",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "patterns",
+      "source": "# Placeholder class for State Recovery\r\nclass Staterecovery:\r\n    \"\"\"Production implementation placeholder for State Recovery.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing State Recovery operations...\"\r\n",
+      "images": []
+    },
+    {
+      "id": "c01",
+      "filename": "systems/healthcare-platform/example.py",
+      "title": "Healthcare Platform",
+      "subtitle": "Complete Enterprise Agent Architecture",
+      "loc": 6,
+      "tools": [],
+      "newTools": [],
+      "coreAddition": "Full Microservices Mesh",
+      "keyInsight": "The flagship Healthcare system integrates all concepts: FastAPI, Docker Compose, Postgres, Redis, and workers.",
+      "classes": [
+        {
+          "name": "Healthcareplatform",
+          "startLine": 2,
+          "endLine": 9
+        }
+      ],
+      "functions": [],
+      "layer": "systems",
+      "source": "# Placeholder class for Healthcare Platform\r\nclass Healthcareplatform:\r\n    \"\"\"Production implementation placeholder for Healthcare Platform.\"\"\"\r\n    def __init__(self) -> None:\r\n        pass\r\n\r\n    def run(self) -> str:\r\n        return \"Executing Healthcare Platform operations...\"\r\n",
+      "images": []
+    }
+  ],
+  "diffs": [
+    {
+      "from": "f01",
+      "to": "f02",
+      "newClasses": [
+        "02Agentloop"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": -94
+    },
+    {
+      "from": "f02",
+      "to": "f03",
+      "newClasses": [
+        "03Toolcalling"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "f03",
+      "to": "f04",
+      "newClasses": [
+        "04Structuredoutput"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "f04",
+      "to": "f05",
+      "newClasses": [
+        "05Memory"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "f05",
+      "to": "f06",
+      "newClasses": [
+        "06Planner"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "f06",
+      "to": "f07",
+      "newClasses": [
+        "07Multiagent"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "f07",
+      "to": "f08",
+      "newClasses": [
+        "08Evaluation"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "f08",
+      "to": "f09",
+      "newClasses": [
+        "09Humanapproval"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "f09",
+      "to": "f10",
+      "newClasses": [
+        "10Scheduling"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "f10",
+      "to": "p01",
+      "newClasses": [
+        "Retry"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p01",
+      "to": "p02",
+      "newClasses": [
+        "Checkpointing"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p02",
+      "to": "p03",
+      "newClasses": [
+        "Queues"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p03",
+      "to": "p04",
+      "newClasses": [
+        "Redis"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p04",
+      "to": "p05",
+      "newClasses": [
+        "Postgresql"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p05",
+      "to": "p06",
+      "newClasses": [
+        "Asyncprocessing"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p06",
+      "to": "p07",
+      "newClasses": [
+        "Streaming"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p07",
+      "to": "p08",
+      "newClasses": [
+        "Observability"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p08",
+      "to": "p09",
+      "newClasses": [
+        "Docker"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p09",
+      "to": "p10",
+      "newClasses": [
+        "Monitoring"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p10",
+      "to": "p11",
+      "newClasses": [
+        "Staterecovery"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    },
+    {
+      "from": "p11",
+      "to": "c01",
+      "newClasses": [
+        "Healthcareplatform"
+      ],
+      "newFunctions": [],
+      "newTools": [],
+      "locDelta": 0
+    }
+  ]
+}
