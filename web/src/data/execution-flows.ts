@@ -48,22 +48,6 @@ export const EXECUTION_FLOWS: Record<string, FlowDefinition> = {
   },
   f03: {
     nodes: [
-      { id: "start", label: "Tool Invocations", type: "start", x: COL_CENTER, y: 30 },
-      { id: "schema", label: "Schema Validation", type: "decision", x: COL_CENTER, y: 120 },
-      { id: "dispatch", label: "Map & Run Tool Handler", type: "subprocess", x: COL_LEFT, y: 220 },
-      { id: "error", label: "Format Error Output", type: "process", x: COL_RIGHT, y: 220 },
-      { id: "end", label: "Return Tool Result", type: "end", x: COL_CENTER, y: 330 },
-    ],
-    edges: [
-      { from: "start", to: "schema" },
-      { from: "schema", to: "dispatch", label: "valid" },
-      { from: "schema", to: "error", label: "invalid" },
-      { from: "dispatch", to: "end" },
-      { from: "error", to: "end" },
-    ],
-  },
-  f04: {
-    nodes: [
       { id: "start", label: "LLM Response", type: "start", x: COL_CENTER, y: 30 },
       { id: "parse", label: "JSON Parse Output", type: "process", x: COL_CENTER, y: 110 },
       { id: "validate", label: "Pydantic Validator", type: "decision", x: COL_CENTER, y: 200 },
@@ -76,6 +60,22 @@ export const EXECUTION_FLOWS: Record<string, FlowDefinition> = {
       { from: "validate", to: "end", label: "valid" },
       { from: "validate", to: "fail", label: "invalid" },
       { from: "fail", to: "start", label: "retry" },
+    ],
+  },
+  f04: {
+    nodes: [
+      { id: "start", label: "Tool Invocations", type: "start", x: COL_CENTER, y: 30 },
+      { id: "schema", label: "Schema Validation", type: "decision", x: COL_CENTER, y: 120 },
+      { id: "dispatch", label: "Map & Run Tool Handler", type: "subprocess", x: COL_LEFT, y: 220 },
+      { id: "error", label: "Format Error Output", type: "process", x: COL_RIGHT, y: 220 },
+      { id: "end", label: "Return Tool Result", type: "end", x: COL_CENTER, y: 330 },
+    ],
+    edges: [
+      { from: "start", to: "schema" },
+      { from: "schema", to: "dispatch", label: "valid" },
+      { from: "schema", to: "error", label: "invalid" },
+      { from: "dispatch", to: "end" },
+      { from: "error", to: "end" },
     ],
   },
   f05: {
@@ -130,21 +130,6 @@ export const EXECUTION_FLOWS: Record<string, FlowDefinition> = {
   },
   f08: {
     nodes: [
-      { id: "start", label: "Agent Invocations", type: "start", x: COL_CENTER, y: 30 },
-      { id: "run", label: "Collect Trajectory logs", type: "process", x: COL_CENTER, y: 110 },
-      { id: "judge", label: "LLM-as-a-Judge Eval", type: "decision", x: COL_CENTER, y: 200 },
-      { id: "pass", label: "Store Metrics (Pass)", type: "end", x: COL_LEFT, y: 300 },
-      { id: "fail", label: "Raise Assertion (Fail)", type: "end", x: COL_RIGHT, y: 300 },
-    ],
-    edges: [
-      { from: "start", to: "run" },
-      { from: "run", to: "judge" },
-      { from: "judge", to: "pass", label: "metrics ok" },
-      { from: "judge", to: "fail", label: "violations" },
-    ],
-  },
-  f09: {
-    nodes: [
       { id: "start", label: "Dangerous Action", type: "start", x: COL_CENTER, y: 30 },
       { id: "gate", label: "Trigger Interruption", type: "process", x: COL_CENTER, y: 110 },
       { id: "approve", label: "Await Human Input", type: "decision", x: COL_CENTER, y: 200 },
@@ -156,6 +141,21 @@ export const EXECUTION_FLOWS: Record<string, FlowDefinition> = {
       { from: "gate", to: "approve" },
       { from: "approve", to: "resume", label: "approved" },
       { from: "approve", to: "cancel", label: "rejected" },
+    ],
+  },
+  f09: {
+    nodes: [
+      { id: "start", label: "Agent Invocations", type: "start", x: COL_CENTER, y: 30 },
+      { id: "run", label: "Collect Trajectory logs", type: "process", x: COL_CENTER, y: 110 },
+      { id: "judge", label: "LLM-as-a-Judge Eval", type: "decision", x: COL_CENTER, y: 200 },
+      { id: "pass", label: "Store Metrics (Pass)", type: "end", x: COL_LEFT, y: 300 },
+      { id: "fail", label: "Raise Assertion (Fail)", type: "end", x: COL_RIGHT, y: 300 },
+    ],
+    edges: [
+      { from: "start", to: "run" },
+      { from: "run", to: "judge" },
+      { from: "judge", to: "pass", label: "metrics ok" },
+      { from: "judge", to: "fail", label: "violations" },
     ],
   },
   f10: {
@@ -173,6 +173,75 @@ export const EXECUTION_FLOWS: Record<string, FlowDefinition> = {
       { from: "check", to: "run", label: "yes" },
       { from: "check", to: "loop", label: "no" },
       { from: "run", to: "loop" },
+    ],
+  },
+  f11: {
+    nodes: [
+      { id: "start", label: "Async Task Start", type: "start", x: COL_CENTER, y: 30 },
+      { id: "coroutine", label: "Spawn Coroutine", type: "process", x: COL_CENTER, y: 110 },
+      { id: "gather", label: "asyncio.gather()", type: "subprocess", x: COL_CENTER, y: 200 },
+      { id: "end", label: "Combined Output", type: "end", x: COL_CENTER, y: 290 },
+    ],
+    edges: [
+      { from: "start", to: "coroutine" },
+      { from: "coroutine", to: "gather" },
+      { from: "gather", to: "end" },
+    ],
+  },
+  f12: {
+    nodes: [
+      { id: "start", label: "Incoming Event", type: "start", x: COL_CENTER, y: 30 },
+      { id: "bus", label: "Publish to Event Bus", type: "process", x: COL_CENTER, y: 120 },
+      { id: "dispatch", label: "Route to Listeners", type: "subprocess", x: COL_LEFT, y: 210 },
+      { id: "end", label: "State Updated", type: "end", x: COL_RIGHT, y: 210 },
+    ],
+    edges: [
+      { from: "start", to: "bus" },
+      { from: "bus", to: "dispatch" },
+      { from: "dispatch", to: "end" },
+    ],
+  },
+  f13: {
+    nodes: [
+      { id: "start", label: "Current State", type: "start", x: COL_CENTER, y: 30 },
+      { id: "guard", label: "Validate State Transition", type: "decision", x: COL_CENTER, y: 120 },
+      { id: "transition", label: "Update State Model", type: "process", x: COL_LEFT, y: 210 },
+      { id: "error", label: "Raise Transition Error", type: "end", x: COL_RIGHT, y: 210 },
+      { id: "end", label: "New Valid State", type: "end", x: COL_LEFT, y: 300 },
+    ],
+    edges: [
+      { from: "start", to: "guard" },
+      { from: "guard", to: "transition", label: "allowed" },
+      { from: "guard", to: "error", label: "forbidden" },
+      { from: "transition", to: "end" },
+    ],
+  },
+  f14: {
+    nodes: [
+      { id: "start", label: "Error Occurred", type: "start", x: COL_CENTER, y: 30 },
+      { id: "classify", label: "Classify Exception", type: "decision", x: COL_CENTER, y: 120 },
+      { id: "retry", label: "Retry Policy", type: "process", x: COL_LEFT, y: 210 },
+      { id: "escalate", label: "Escalate / Fail", type: "end", x: COL_RIGHT, y: 210 },
+      { id: "end", label: "Success on Retry", type: "end", x: COL_LEFT, y: 300 },
+    ],
+    edges: [
+      { from: "start", to: "classify" },
+      { from: "classify", to: "retry", label: "transient" },
+      { from: "classify", to: "escalate", label: "fatal" },
+      { from: "retry", to: "end" },
+    ],
+  },
+  f15: {
+    nodes: [
+      { id: "start", label: "Memory State", type: "start", x: COL_CENTER, y: 30 },
+      { id: "serialize", label: "Serialize to JSON", type: "process", x: COL_CENTER, y: 110 },
+      { id: "write", label: "Write to DB/Disk", type: "subprocess", x: COL_CENTER, y: 190 },
+      { id: "end", label: "Durable Saved State", type: "end", x: COL_CENTER, y: 270 },
+    ],
+    edges: [
+      { from: "start", to: "serialize" },
+      { from: "serialize", to: "write" },
+      { from: "write", to: "end" },
     ],
   },
 };

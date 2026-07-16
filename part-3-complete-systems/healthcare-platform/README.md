@@ -2,7 +2,7 @@
 
 Welcome to this lesson on **Healthcare Platform** in Production AI Engineering.
 
-## Why does this exist?
+## Why this concept exists?
 This placeholder details the concepts and engineering considerations for **Healthcare Platform**.
 
 ---

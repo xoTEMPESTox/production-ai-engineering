@@ -1,10 +1,10 @@
 import unittest
-from example import 05Memory
+from example import Memory
 
-class Test05Memory(unittest.TestCase):
+class TestMemory(unittest.TestCase):
     def test_placeholder(self) -> None:
-        obj = 05Memory()
-        self.assertEqual(obj.run(), "Executing 05 Memory operations...")
+        obj = Memory()
+        self.assertEqual(obj.run(), "Executing Memory operations...")
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,14 +1,14 @@
-# 02 Agent Loop
+# Agent Loop
 
-Welcome to this lesson on **02 Agent Loop** in Production AI Engineering.
+Welcome to this lesson on **Agent Loop** in Production AI Engineering.
 
-## Why does this exist?
-This placeholder details the concepts and engineering considerations for **02 Agent Loop**.
+## Why this concept exists?
+This placeholder details the concepts and engineering considerations for **Agent Loop**.
 
 ---
 
 ## What problem does it solve?
-A production-grade implementation of **02 Agent Loop** ensures safety, predictability, and efficiency in production AI pipelines.
+A production-grade implementation of **Agent Loop** ensures safety, predictability, and efficiency in production AI pipelines.
 
 ---
 

@@ -10,6 +10,7 @@ const LAYER_DOT_BG: Record<string, string> = {
   foundations: "bg-blue-500",
   patterns: "bg-emerald-500",
   systems: "bg-purple-500",
+  infrastructure: "bg-amber-500",
 };
 
 export function Sidebar() {

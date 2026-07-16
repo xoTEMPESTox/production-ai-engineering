@@ -1,7 +1,8 @@
 export type AgentLayer =
   | "foundations"
   | "patterns"
-  | "systems";
+  | "systems"
+  | "infrastructure";
 
 export interface ChapterImage {
   src: string;

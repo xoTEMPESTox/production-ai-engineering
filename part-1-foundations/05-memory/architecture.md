@@ -1,3 +1,3 @@
-# 05 Memory - Architecture
+# Memory - Architecture
 
-This document describes the architectural outline and layout of **05 Memory**.
+This document describes the architectural outline and layout of **Memory**.

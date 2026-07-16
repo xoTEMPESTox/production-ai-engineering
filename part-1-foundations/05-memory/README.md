@@ -1,14 +1,14 @@
-# 05 Memory
+# Memory
 
-Welcome to this lesson on **05 Memory** in Production AI Engineering.
+Welcome to this lesson on **Memory** in Production AI Engineering.
 
-## Why does this exist?
-This placeholder details the concepts and engineering considerations for **05 Memory**.
+## Why this concept exists?
+This placeholder details the concepts and engineering considerations for **Memory**.
 
 ---
 
 ## What problem does it solve?
-A production-grade implementation of **05 Memory** ensures safety, predictability, and efficiency in production AI pipelines.
+A production-grade implementation of **Memory** ensures safety, predictability, and efficiency in production AI pipelines.
 
 ---
 

@@ -19,41 +19,56 @@ type Locale = "en" | "zh" | "ja";
 
 interface ChapterSource {
   id: string;
-  part: string; // foundations, patterns, systems
+  part: string; // foundations, patterns, systems, infrastructure
   dirName: string;
   dirPath: string;
   codePath: string;
 }
 
-// Map subdirectories to unique lesson IDs (f01-f10, p01-p11, c01)
+// Map subdirectories to unique lesson IDs (f01-f15, p16-p30, c01-c04, i01)
 const LESSON_ID_MAP: Record<string, string> = {
   // Part 1: Foundations
   "part-1-foundations/01-state": "f01",
   "part-1-foundations/02-agent-loop": "f02",
-  "part-1-foundations/03-tool-calling": "f03",
-  "part-1-foundations/04-structured-output": "f04",
+  "part-1-foundations/03-prompting-structured-output": "f03",
+  "part-1-foundations/04-tool-calling": "f04",
   "part-1-foundations/05-memory": "f05",
-  "part-1-foundations/06-planner": "f06",
-  "part-1-foundations/07-multi-agent": "f07",
-  "part-1-foundations/08-evaluation": "f08",
-  "part-1-foundations/09-human-approval": "f09",
-  "part-1-foundations/10-scheduling": "f10",
+  "part-1-foundations/06-planning-task-decomposition": "f06",
+  "part-1-foundations/07-multi-agent-coordination": "f07",
+  "part-1-foundations/08-human-approval": "f08",
+  "part-1-foundations/09-evaluation-self-reflection": "f09",
+  "part-1-foundations/10-scheduling-long-running-tasks": "f10",
+  "part-1-foundations/11-async-execution": "f11",
+  "part-1-foundations/12-event-driven-agents": "f12",
+  "part-1-foundations/13-state-machines": "f13",
+  "part-1-foundations/14-error-handling": "f14",
+  "part-1-foundations/15-persistence": "f15",
 
   // Part 2: Production Patterns
-  "part-2-production-patterns/retry": "p01",
-  "part-2-production-patterns/checkpointing": "p02",
-  "part-2-production-patterns/queues": "p03",
-  "part-2-production-patterns/redis": "p04",
-  "part-2-production-patterns/postgresql": "p05",
-  "part-2-production-patterns/async-processing": "p06",
-  "part-2-production-patterns/streaming": "p07",
-  "part-2-production-patterns/observability": "p08",
-  "part-2-production-patterns/docker": "p09",
-  "part-2-production-patterns/monitoring": "p10",
-  "part-2-production-patterns/state-recovery": "p11",
+  "part-2-production-patterns/16-retry-patterns": "p16",
+  "part-2-production-patterns/17-background-workers": "p17",
+  "part-2-production-patterns/18-redis-checkpointing": "p18",
+  "part-2-production-patterns/19-postgresql-state-store": "p19",
+  "part-2-production-patterns/20-queues": "p20",
+  "part-2-production-patterns/21-streaming": "p21",
+  "part-2-production-patterns/22-observability": "p22",
+  "part-2-production-patterns/23-docker": "p23",
+  "part-2-production-patterns/24-deployment": "p24",
+  "part-2-production-patterns/25-configuration": "p25",
+  "part-2-production-patterns/26-monitoring": "p26",
+  "part-2-production-patterns/27-evaluation-pipelines": "p27",
+  "part-2-production-patterns/28-cost-tracking": "p28",
+  "part-2-production-patterns/29-security": "p29",
+  "part-2-production-patterns/30-scaling": "p30",
 
   // Part 3: Complete Systems
   "part-3-complete-systems/healthcare-platform": "c01",
+  "part-3-complete-systems/customer-support": "c02",
+  "part-3-complete-systems/research-assistant": "c03",
+  "part-3-complete-systems/coding-agent": "c04",
+
+  // Part 4: Infrastructure
+  "part-4-infrastructure/local-compose-deployment": "i01",
 };
 
 function listRootChapters(): ChapterSource[] {
@@ -62,6 +77,7 @@ function listRootChapters(): ChapterSource[] {
     { dir: "part-1-foundations", label: "foundations" },
     { dir: "part-2-production-patterns", label: "patterns" },
     { dir: "part-3-complete-systems", label: "systems" },
+    { dir: "part-4-infrastructure", label: "infrastructure" },
   ];
 
   for (const part of parts) {
@@ -222,7 +238,6 @@ function rewriteChapterMarkdown(
 
 function buildRootVersions(chapters: ChapterSource[]): AgentVersion[] {
   return chapters.map((chapter) => {
-    // If example.py doesn't exist, use empty file contents
     const source = fs.existsSync(chapter.codePath)
       ? fs.readFileSync(chapter.codePath, "utf-8")
       : "";
@@ -241,7 +256,7 @@ function buildRootVersions(chapters: ChapterSource[]): AgentVersion[] {
       keyInsight: meta?.keyInsight ?? "",
       classes: extractClasses(lines),
       functions: extractFunctions(lines),
-      layer: meta?.layer ?? "tools",
+      layer: meta?.layer ?? "foundations",
       source,
       images: copyChapterAssets(chapter),
     };
@@ -250,7 +265,7 @@ function buildRootVersions(chapters: ChapterSource[]): AgentVersion[] {
 
 function buildRootDocs(chapters: ChapterSource[]): DocContent[] {
   const docs: DocContent[] = [];
-  const locales: Locale[] = ["en"]; // English only as per brief
+  const locales: Locale[] = ["en"]; // English only
 
   for (const chapter of chapters) {
     for (const locale of locales) {

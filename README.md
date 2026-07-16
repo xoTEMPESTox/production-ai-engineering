@@ -41,31 +41,95 @@ Every chapter answers:
 
 ```
 production-ai-engineering/
-├── part-1-foundations/             # Primitives & core building blocks
+├── part-1-foundations/             # Primitives & core building blocks (f01–f15)
 │   ├── 01-state/                   # Thread-safe, immutable, versioned state stores
 │   ├── 02-agent-loop/              # Stable, model-independent execution cycles
-│   ├── 03-tool-calling/            # Schema validation & secure tool dispatchers
-│   └── ...                         # Structured Output, Memory, Planner, Evals, etc.
+│   └── ...                         # Prompts, Tool calling, Memory, HITL, Scheduling
 │
-├── part-2-production-patterns/     # High-scale production engineering concerns
-│   ├── retry/                      # Backoffs and transient error management
-│   ├── checkpointing/              # Mid-run state persistence & durability
-│   ├── queues/                     # Decoupling workflows with workers & brokers
-│   └── ...                         # Redis caching, Postgres database, Observability
+├── part-2-production-patterns/     # High-scale production engineering concerns (p16–p30)
+│   ├── 16-retry-patterns/          # Transient error backoffs & jitter policies
+│   ├── 17-background-workers/      # Offloaded async computations
+│   └── ...                         # Redis checkpoints, Postgres state database, queues
 │
-├── part-3-complete-systems/        # Combined production architectures
-│   └── healthcare-platform/        # Flagship multi-service enterprise application
+├── part-3-complete-systems/        # Combined production architectures (c01–c04)
+│   ├── healthcare-platform/        # Flagship multi-service HIPAA-inspired platform
+│   └── ...                         # Support engine, research pipeline, coding agent
+│
+├── part-4-infrastructure/          # Multi-container local environments (i01)
+│   └── local-compose-deployment/   # Orchestrated docker compose workspace specs
 │
 ├── common/                         # Shared helper libraries
-├── docker/                         # Multi-stage Docker & Compose setups
-└── web/                            # Interactive learning visualizer dashboard (Next.js)
+└── web/                            # Interactive Next.js visualizer documentation dashboard
 ```
 
-Each lesson contains:
-1. **README.md**: Concepts, beginner vs. production implementations, tradeoffs, and failure modes.
-2. **architecture.md**: Diagrams explaining execution flows and component interactions.
-3. **example.py**: Strong-typed, runnable production implementation.
+Each lesson in Part 1 and Part 2 contains:
+1. **README.md**: Conceptual definitions, naive vs. production architectures, and design tradeoffs.
+2. **architecture.md**: Diagrams explaining execution flows and component interfaces.
+3. **example.py**: Strong-typed, runnable production-grade Python implementation.
 4. **tests.py**: Automated tests verifying correctness and concurrency bounds.
+
+---
+
+## 📚 Final Curriculum
+
+### PART I — Foundations (Learn AI Systems)
+Goal: Learn how an AI system thinks before learning how it survives production. These chapters are under 200 LOC, runnable, concept-focused, and highly educational.
+
+| # | Chapter | Key Focus / Primitives |
+|---|---------|------------------------|
+| 01 | [State Representation](part-1-foundations/01-state) | Thread-safety, copy-on-write immutability & audit rollbacks |
+| 02 | [The Agent Loop](part-1-foundations/02-agent-loop) | Model-independent core execution cycles |
+| 03 | [Prompting & Structured Output](part-1-foundations/03-prompting-structured-output) | Schema enforcement, Pydantic parsing & format corrections |
+| 04 | [Tool Calling](part-1-foundations/04-tool-calling) | Dynamic tool registry validation & dispatcher |
+| 05 | [Memory System](part-1-foundations/05-memory) | Short-term context compaction & long-term episodic retrieval |
+| 06 | [Planning & Task Decomposition](part-1-foundations/06-planning-task-decomposition) | DAG step coordinators & dynamic goal breaking |
+| 07 | [Multi-Agent Coordination](part-1-foundations/07-multi-agent-coordination) | Decoupled worker agents, routers & messaging |
+| 08 | [Human Approval (HITL)](part-1-foundations/08-human-approval) | Pausable execution gates & approval mechanisms |
+| 09 | [Evaluation & Self Reflection](part-1-foundations/09-evaluation-self-reflection) | Automated LLM-as-a-judge quality evaluations |
+| 10 | [Scheduling & Long Running Tasks](part-1-foundations/10-scheduling-long-running-tasks) | Durable cron loops and deferred check-ins |
+| 11 | [Async Execution](part-1-foundations/11-async-execution) | Concurrency and parallel step resolution using `asyncio` |
+| 12 | [Event Driven Agents](part-1-foundations/12-event-driven-agents) | Event streaming, pub/sub buses & event logging |
+| 13 | [State Machines](part-1-foundations/13-state-machines) | Strict finite state transitions to guard against loop drift |
+| 14 | [Error Handling](part-1-foundations/14-error-handling) | Exception classification pipelines |
+| 15 | [Persistence](part-1-foundations/15-persistence) | Serialization interfaces for saving states to disk |
+
+---
+
+### PART II — Production Patterns
+Goal: Learn how to scale, secure, monitor, and configure agents in a production environment.
+
+| # | Chapter | Key Focus / Primitives |
+|---|---------|------------------------|
+| 16 | [Retry Patterns](part-2-production-patterns/16-retry-patterns) | Transient error backoff, jitter, and classification |
+| 17 | [Background Workers](part-2-production-patterns/17-background-workers) | Asynchronous process offloading & worker thread pooling |
+| 18 | [Redis Checkpointing](part-2-production-patterns/18-redis-checkpointing) | Running checkpoint states to Redis for recovery resumes |
+| 19 | [PostgreSQL State Store](part-2-production-patterns/19-postgresql-state-store) | ACID relational database transaction logs |
+| 20 | [Queues](part-2-production-patterns/20-queues) | Task distribution brokers and consumer backpressure |
+| 21 | [Streaming](part-2-production-patterns/21-streaming) | SSE token-by-token client streaming APIs |
+| 22 | [Observability](part-2-production-patterns/22-observability) | OpenTelemetry instrumentation, spans & prompt cost tracing |
+| 23 | [Docker](part-2-production-patterns/23-docker) | Multi-stage Docker environments for runtime parity |
+| 24 | [Deployment](part-2-production-patterns/24-deployment) | Stateless app servers and separated DB architectures |
+| 25 | [Configuration](part-2-production-patterns/25-configuration) | Strong-typed environment config parsers & secrets |
+| 26 | [Monitoring](part-2-production-patterns/26-monitoring) | Real-time Prometheus metrics of cost, latency, & errors |
+| 27 | [Evaluation Pipelines](part-2-production-patterns/27-evaluation-pipelines) | Automated CI/CD prompt regression datasets |
+| 28 | [Cost Tracking](part-2-production-patterns/28-cost-tracking) | Session budget guards & cumulative pricing calculators |
+| 29 | [Security](part-2-production-patterns/29-security) | Isolated subshells, shell sandboxes, & prompt inspection |
+| 30 | [Scaling](part-2-production-patterns/30-scaling) | High-concurrency horizontal scaling setup |
+
+---
+
+### PART III — Complete Systems
+Goal: Reference implementations of complete production applications built using the foundations and patterns.
+
+* **[Healthcare Platform](part-3-complete-systems/healthcare-platform) (Flagship ⭐)**: HIPAA-inspired agent integrating intake queues, Redis checkpoints, human review gates, and PostgreSQL audits.
+* **[Customer Support](part-3-complete-systems/customer-support)**: Omnichannel routing engine, stateful context resume, and live human handoff layers.
+* **[Research Assistant](part-3-complete-systems/research-assistant)**: Parallelized web/document search with automatic fact-checking synthesizers.
+* **[Coding Agent](part-3-complete-systems/coding-agent)**: Git worktree sandboxing, test-driven self-repair loops, and file operations.
+
+---
+
+### PART IV — Infrastructure
+* **[Local Compose Deployment](part-4-infrastructure/local-compose-deployment)**: Docker Compose specifications spinning up Redis caching, PostgreSQL databases, worker queues, Swagger endpoints, and real-time dashboard telemetry.
 
 ---
 
@@ -125,3 +189,9 @@ When viewing a lesson, simply click the **🚀 Launch Live Demo** button. The do
 > *"Run `docker compose up` in `examples/healthcare/` (or the relevant chapter directory) and refresh this page."*
 
 Once the site successfully pings and identifies the backend container, the static page automatically switches to live interactive mode.
+
+---
+
+## 🤝 Acknowledgements
+
+This project's educational website and progressive learning experience were inspired by the excellent **Learn Claude Code** project. Their progressive documentation style heavily influenced the organization of this repository. All curriculum, code, examples, architecture diagrams, and production implementations in this repository are original and focused on production-grade AI engineering.

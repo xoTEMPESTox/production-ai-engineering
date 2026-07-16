@@ -13,18 +13,21 @@ const LAYER_DOT_COLORS: Record<string, string> = {
   foundations: "bg-blue-500",
   patterns: "bg-emerald-500",
   systems: "bg-purple-500",
+  infrastructure: "bg-amber-500",
 };
 
 const LAYER_BORDER_COLORS: Record<string, string> = {
   foundations: "border-blue-500/30 hover:border-blue-500/60",
   patterns: "border-emerald-500/30 hover:border-emerald-500/60",
   systems: "border-purple-500/30 hover:border-purple-500/60",
+  infrastructure: "border-amber-500/30 hover:border-amber-500/60",
 };
 
 const LAYER_BAR_COLORS: Record<string, string> = {
   foundations: "bg-blue-500",
   patterns: "bg-emerald-500",
   systems: "bg-purple-500",
+  infrastructure: "bg-amber-500",
 };
 
 function getVersionData(id: string) {
