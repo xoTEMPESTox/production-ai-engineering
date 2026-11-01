@@ -22,60 +22,21 @@ const LAYER_BORDER_COLORS: Record<string, string> = {
   infrastructure: "border-amber-500/30 hover:border-amber-500/60",
 };
 
-// English only for now: zh.json and ja.json have no translations for these sections yet.
-const COPY = {
-  eyebrow: "Agent · RAG · Harness",
-  browse_parts: "Browse the parts",
-  stat_lessons: "lessons",
-  stat_parts: "parts",
-  stat_offline: "every example and test runs offline, no API key",
-  kit_title: "Every lesson folder",
-  pillars_title: "Three pillars",
-  pillars_desc:
-    "Every lesson is tagged with the pillars it teaches. The hard production bugs tend to sit where they meet: an agent that retrieves, a retriever inside a loop, and both inside a harness.",
-  demo_label: "the demo loop",
-  harness_label: "the harnessed loop (simplified from lesson 02)",
-  demo_keeps: "What the demo leaves behind: a messages[] list that only grows.",
-  harness_keeps: "What the harness leaves behind: a typed event log that ends in a stop reason (real output from lesson 02).",
-  gap_lesson: "Lesson 02 builds this loop step by step",
-  credits_title: "Where this comes from",
-  credits_body_1:
-    "This site's step-by-step format comes from Learn Claude Code, which teaches how an agent harness is built one mechanism at a time. If you have never written an agent loop, start there.",
-  credits_body_2:
-    "This curriculum picks up where a working demo ends. It expands on that foundation with the production side, drawn from hands-on experience building and running agent and retrieval systems: each lesson shows how the naive version breaks, then ships code and tests that catch it. All lesson content and code here is original.",
-  credits_link: "Learn Claude Code on GitHub",
-};
-
 // Lessons where each pillar is taught most directly (from each README's "Pillars" line).
 const PILLARS = [
-  {
-    title: "Agent",
-    accent: "bg-indigo-500",
-    desc: "The model chooses the next step. These lessons keep that loop bounded, its tools permissioned and idempotent, and its plans, hand-offs and approvals as plain data you can inspect and resume.",
-    lessons: ["f02", "f04", "f06", "f07", "f08", "f13", "c04"],
-  },
-  {
-    title: "RAG",
-    accent: "bg-teal-500",
-    desc: "The model answers from your documents. These lessons filter by tenant before ranking, combine keyword and vector search, require answers to cite the sources they were given, and measure retrieval with Recall@k and MRR.",
-    lessons: ["f05", "f03", "f09", "p23", "p27", "c03"],
-  },
-  {
-    title: "Harness",
-    accent: "bg-rose-500",
-    desc: "Everything around the model that makes it safe to run: state, retries, checkpoints, queues, traces, cost limits, security and deploys.",
-    lessons: ["f01", "f14", "f15", "p16", "p17", "p22", "p28", "p29"],
-  },
+  { key: "agent", accent: "bg-indigo-500", lessons: ["f02", "f04", "f06", "f07", "f08", "f13", "c04"] },
+  { key: "rag", accent: "bg-teal-500", lessons: ["f05", "f03", "f09", "p23", "p27", "c03"] },
+  { key: "harness", accent: "bg-rose-500", lessons: ["f01", "f14", "f15", "p16", "p17", "p22", "p28", "p29"] },
 ];
 
 // Placeholders until they are written; shown as "planned" instead of a line count.
 const PLANNED = new Set(["c01", "i01"]);
 
 const LESSON_FILES = [
-  { name: "README.md", desc: "why it exists, the naive version and why it fails, the production version, tradeoffs, failure cases" },
-  { name: "architecture.md", desc: "mermaid diagrams of the flow, and the naive and production designs side by side" },
-  { name: "example.py", desc: "a runnable demo with a scripted model: python example.py" },
-  { name: "tests.py", desc: "the README's failure cases, written as unittest tests" },
+  { name: "README.md", key: "kit_readme" },
+  { name: "architecture.md", key: "kit_architecture" },
+  { name: "example.py", key: "kit_example" },
+  { name: "tests.py", key: "kit_tests" },
 ];
 
 const DEMO_LOOP = [
@@ -166,7 +127,7 @@ export default function HomePage() {
       <section className="grid items-center gap-10 pt-8 sm:pt-16 lg:grid-cols-2">
         <div>
           <p className="font-mono text-sm tracking-wide text-[var(--color-text-secondary)]">
-            {COPY.eyebrow}
+            {t("eyebrow")}
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">
             {t("hero_title")}
@@ -186,22 +147,22 @@ export default function HomePage() {
               href={`/${locale}/layers`}
               className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--color-border)] px-6 py-3 text-sm font-medium transition-colors hover:bg-[var(--color-bg-secondary)]"
             >
-              {COPY.browse_parts}
+              {t("browse_parts")}
             </Link>
           </div>
           <p className="mt-6 text-sm text-[var(--color-text-secondary)]">
-            {LEARNING_PATH.length} {COPY.stat_lessons} · {LAYERS.length} {COPY.stat_parts} · {COPY.stat_offline}
+            {LEARNING_PATH.length} {t("stat_lessons")} · {LAYERS.length} {t("stat_parts")} · {t("stat_offline")}
           </p>
         </div>
         <div className="min-w-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
           <div className="border-b border-zinc-800 px-4 py-2 font-mono text-xs text-zinc-400">
-            {COPY.kit_title}: part-1-foundations/02-agent-loop/
+            {t("kit_title")}: part-1-foundations/02-agent-loop/
           </div>
           <ul className="divide-y divide-zinc-800/70">
             {LESSON_FILES.map((file) => (
               <li key={file.name} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:gap-4">
                 <span className="w-36 shrink-0 font-mono text-sm text-zinc-100">{file.name}</span>
-                <span className="text-sm text-zinc-400">{file.desc}</span>
+                <span className="text-sm text-zinc-400">{t(file.key)}</span>
               </li>
             ))}
           </ul>
@@ -211,21 +172,21 @@ export default function HomePage() {
       {/* Three pillars */}
       <section>
         <div className="mb-6">
-          <h2 className="text-2xl font-bold sm:text-3xl">{COPY.pillars_title}</h2>
-          <p className="mt-2 max-w-3xl text-[var(--color-text-secondary)]">{COPY.pillars_desc}</p>
+          <h2 className="text-2xl font-bold sm:text-3xl">{t("pillars_title")}</h2>
+          <p className="mt-2 max-w-3xl text-[var(--color-text-secondary)]">{t("pillars_desc")}</p>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {PILLARS.map((pillar) => (
             <div
-              key={pillar.title}
+              key={pillar.key}
               className="flex flex-col rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5"
             >
               <div className="flex items-center gap-2">
                 <span className={cn("h-2.5 w-2.5 rounded-full", pillar.accent)} />
-                <h3 className="text-lg font-semibold">{pillar.title}</h3>
+                <h3 className="text-lg font-semibold">{t(`pillar_${pillar.key}`)}</h3>
               </div>
               <p className="mt-2 flex-1 text-sm text-[var(--color-text-secondary)]">
-                {pillar.desc}
+                {t(`pillar_${pillar.key}_desc`)}
               </p>
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {pillar.lessons.map((vid) => (
@@ -254,16 +215,16 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
-            <CodePane title={COPY.demo_label} lines={DEMO_LOOP} />
+            <CodePane title={t("demo_label")} lines={DEMO_LOOP} />
             <div>
-              <p className="mb-2 text-sm text-[var(--color-text-secondary)]">{COPY.demo_keeps}</p>
+              <p className="mb-2 text-sm text-[var(--color-text-secondary)]">{t("demo_keeps")}</p>
               <MessageFlow />
             </div>
           </div>
           <div className="flex min-w-0 flex-col gap-4">
-            <CodePane title={COPY.harness_label} lines={HARNESSED_LOOP} />
+            <CodePane title={t("harness_label")} lines={HARNESSED_LOOP} />
             <div>
-              <p className="mb-2 text-sm text-[var(--color-text-secondary)]">{COPY.harness_keeps}</p>
+              <p className="mb-2 text-sm text-[var(--color-text-secondary)]">{t("harness_keeps")}</p>
               <div className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs leading-relaxed">
                 {RUN_LOG.map(([step, kind, detail], i) => (
                   <div key={i} className="whitespace-nowrap">
@@ -278,7 +239,7 @@ export default function HomePage() {
         </div>
         <p className="mt-4 text-sm">
           <Link href={`/${locale}/f02`} className="underline underline-offset-4 hover:opacity-80">
-            {COPY.gap_lesson} &rarr;
+            {t("gap_lesson")} &rarr;
           </Link>
         </p>
       </section>
@@ -320,7 +281,7 @@ export default function HomePage() {
                         <span className="font-mono text-xs text-[var(--color-text-secondary)]">{vid}</span>
                         {PLANNED.has(vid) ? (
                           <span className="rounded bg-[var(--color-bg-secondary)] px-1.5 py-0.5 text-xs text-[var(--color-text-secondary)]">
-                            planned
+                            {t("planned")}
                           </span>
                         ) : (
                           data && (
@@ -343,12 +304,12 @@ export default function HomePage() {
 
       {/* Credits */}
       <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-6 sm:p-8">
-        <h2 className="text-xl font-bold sm:text-2xl">{COPY.credits_title}</h2>
+        <h2 className="text-xl font-bold sm:text-2xl">{t("credits_title")}</h2>
         <p className="mt-3 max-w-3xl text-sm text-[var(--color-text-secondary)] sm:text-base">
-          {COPY.credits_body_1}
+          {t("credits_body_1")}
         </p>
         <p className="mt-3 max-w-3xl text-sm text-[var(--color-text-secondary)] sm:text-base">
-          {COPY.credits_body_2}
+          {t("credits_body_2")}
         </p>
         <a
           href="https://github.com/shareAI-lab/learn-claude-code"
@@ -356,7 +317,7 @@ export default function HomePage() {
           rel="noopener noreferrer"
           className="mt-4 inline-block text-sm font-medium underline underline-offset-4 hover:opacity-80"
         >
-          {COPY.credits_link} &rarr;
+          {t("credits_link")} &rarr;
         </a>
       </section>
     </div>
