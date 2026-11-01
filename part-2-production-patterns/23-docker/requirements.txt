@@ -1,0 +1,4 @@
+# Runtime dependencies for this service's image, pinned so every build gets the same versions.
+fastapi==0.162.0
+uvicorn==0.54.0
+pydantic==2.14.2

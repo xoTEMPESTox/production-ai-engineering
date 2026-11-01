@@ -1,0 +1,2 @@
+# The index is a checksummed artifact: never let git rewrite its line endings.
+index/** -text
