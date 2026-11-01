@@ -170,7 +170,7 @@ class CheckpointStore:
 
 
 if __name__ == "__main__":
-    now = [0.0]
+    now = [0.0]  # a fake clock: the demo moves time by setting now[0] (a list, so lambdas see the change)
     store = FakeRedis(clock=lambda: now[0])
     keys = Keys(env="dev")
     locks, checkpoints = RunLock(store, keys), CheckpointStore(store, keys)

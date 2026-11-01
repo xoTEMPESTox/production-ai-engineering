@@ -134,7 +134,7 @@ def run_worker(store: JobStore, worker: str, process_item: Callable[[str, int], 
 
 
 if __name__ == "__main__":
-    now = [0.0]
+    now = [0.0]  # a fake clock: the demo moves time by setting now[0] (a list, so lambdas see the change)
     store = JobStore(clock=lambda: now[0])
     index: dict[tuple[str, int], int] = {}  # (job, doc) -> times embedded
 

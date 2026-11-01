@@ -201,7 +201,7 @@ if __name__ == "__main__":
     except ValueError as exc:
         print("calculator refused:", exc)
 
-    now = [0.0]
+    now = [0.0]  # a fake clock: the demo moves time by setting now[0] (a list, so lambdas see the change)
     limiter = RateLimiter(capacity=3, refill_per_s=0.5, clock=lambda: now[0])
     print("burst of 5:", [limiter.allow("user-42") for _ in range(5)])
     now[0] += 2

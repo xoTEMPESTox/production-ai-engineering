@@ -114,10 +114,12 @@ class ConversationAgent:
     def __init__(self) -> None:
         self.carts: dict[str, list[str]] = {}
         self.seen: set[str] = set()  # record ids already applied (a table in production)
+        self.skipped: list[str] = []  # redeliveries absorbed by the check below
         self.order_by_key: dict[str, list[int]] = {}
 
     def __call__(self, record: Record) -> None:
         if record.record_id in self.seen:
+            self.skipped.append(record.record_id)
             return  # redelivered after a crash: already applied
         if record.value.get("corrupt"):
             raise ValueError("cannot parse event payload")
@@ -139,17 +141,18 @@ if __name__ == "__main__":
         log.append(conv, {"seq": seq, "action": action, "item": item})
     log.append("conv-e", {"seq": 6, "action": "add", "corrupt": True})
     log.append("conv-e", {"seq": 7, "action": "add", "item": "cable"})
-    print("partitions:", {k: log.partition_for(k) for k in ("conv-a", "conv-d", "conv-e")})
+    print("partition per conversation:", {k: log.partition_for(k) for k in ("conv-a", "conv-d", "conv-e")})
 
     group, agent = ConsumerGroup(log), ConversationAgent()
-    print("assignment:", group.rebalance(["consumer-1", "consumer-2"]))
+    print("partitions per consumer:", group.rebalance(["consumer-1", "consumer-2"]))
     c1, c2 = Consumer("consumer-1", group, agent), Consumer("consumer-2", group, agent)
     c1.poll()
     c2.poll(crash_after=1)  # handles conv-e's first event, dies before committing it
-    print("consumer-2 crashed; committed offsets:", group.committed)
+    print("consumer-2 crashed; committed offsets (partition: next offset to read):", group.committed)
 
-    print("after rebalance:", group.rebalance(["consumer-1"]))
+    print("after rebalance, partitions per consumer:", group.rebalance(["consumer-1"]))
     c1.poll()  # resumes consumer-2's partitions from their committed offsets
+    print("redelivered and skipped as already applied:", agent.skipped)
     print("carts:", agent.carts)
-    print("order seen per conversation:", agent.order_by_key)
-    print("dead letters:", [(d.record.key, d.record.offset, d.error) for d in c1.dead_letters])
+    print("order seen per conversation (seq numbers, as sent):", agent.order_by_key)
+    print("dead letters (conversation, offset, error):", [(d.record.key, d.record.offset, d.error) for d in c1.dead_letters])

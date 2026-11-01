@@ -43,10 +43,16 @@ def handle(ticket):
 ## How is this solved in production?
 **1. States and edges are declared.** `Phase` is an enum, and `TRANSITIONS` lists every allowed edge with a guard: a pure function that returns `None` (allowed) or the reason the move isn't allowed.
 ```python
+def _ready_to_draft(s):
+    if s.risk is None:
+        return "risk not assessed"
+    if s.risk == "high":
+        return "high risk must be escalated"
+    return None
+
 TRANSITIONS = {
     Phase.ASSESSING: {
-        Phase.DRAFTING:  lambda s: "risk not assessed" if s.risk is None
-                         else ("high risk must be escalated" if s.risk == "high" else None),
+        Phase.DRAFTING:  _ready_to_draft,
         Phase.ESCALATED: lambda s: None if s.risk == "high" else "only high-risk tickets escalate",
     },
     Phase.AWAITING_REVIEW: {

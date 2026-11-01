@@ -138,7 +138,7 @@ def psi(reference: Counter, current: Counter, floor: float = 1e-4) -> float:
 
 
 if __name__ == "__main__":
-    now = [0.0]
+    now = [0.0]  # a fake clock: the demo moves time by setting now[0] (a list, so lambdas see the change)
     metrics, slo, manager = Metrics(clock=lambda: now[0]), SLO(0.99), AlertManager()
     try:
         metrics.inc("requests", user_id="u-123")

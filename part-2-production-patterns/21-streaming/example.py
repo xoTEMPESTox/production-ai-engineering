@@ -33,9 +33,14 @@ class FakeStreamingLLM:
 
     def __init__(self, reply: str, chunk_chars: int = 6, first_token_s: float = 0.05,
                  per_chunk_s: float = 0.005, fail_after_chunks: Optional[int] = None) -> None:
-        self.reply, self.chunk_chars = reply, chunk_chars
-        self.first_token_s, self.per_chunk_s, self.fail_after_chunks = first_token_s, per_chunk_s, fail_after_chunks
-        self.chunks_sent, self.finished, self.stopped_early = 0, False, False
+        self.reply = reply
+        self.chunk_chars = chunk_chars
+        self.first_token_s = first_token_s
+        self.per_chunk_s = per_chunk_s
+        self.fail_after_chunks = fail_after_chunks
+        self.chunks_sent = 0
+        self.finished = False
+        self.stopped_early = False
 
     async def stream(self, prompt: str) -> AsyncIterator[str]:
         try:

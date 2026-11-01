@@ -113,11 +113,15 @@ def chunk_document(doc_id: str, text: str, max_words: int = 80) -> list[tuple[st
 
 
 def bm25(query: list[str], docs: list[tuple[str, ...]], k1: float = 1.5, b: float = 0.75) -> list[float]:
+    """Keyword relevance of each doc. Per query term: idf (rarer terms count more) times the term's
+    count in the doc, saturated by k1 (the 5th mention adds less than the 1st) and scaled by the doc's
+    length against the average (b: how much a long document is penalised)."""
     avg_len = sum(map(len, docs)) / len(docs) or 1.0
     doc_freq = Counter(term for doc in docs for term in set(doc))
     scores = []
     for doc in docs:
-        tf, score = Counter(doc), 0.0
+        tf = Counter(doc)
+        score = 0.0
         for term in query:
             if term in tf:
                 idf = math.log(1 + (len(docs) - doc_freq[term] + 0.5) / (doc_freq[term] + 0.5))

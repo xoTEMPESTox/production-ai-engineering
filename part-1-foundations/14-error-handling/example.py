@@ -154,7 +154,7 @@ class ScriptedProvider:
 
 
 if __name__ == "__main__":
-    now = [0.0]
+    now = [0.0]  # a fake clock: the demo moves time by setting now[0] (a list, so lambdas see the change)
     outage = ProviderError(503, "service unavailable")
     primary = ScriptedProvider([outage, outage, outage, "Refunds take 5 business days. [billing-02]"])
     fallback = ScriptedProvider(["Refunds usually take about a week."])

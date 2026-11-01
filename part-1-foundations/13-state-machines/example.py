@@ -53,12 +53,19 @@ class MergeConflict(ValueError):
 
 Guard = Callable[[TicketState], Optional[str]]  # None = allowed, else the reason it isn't
 
+def _ready_to_draft(s: TicketState) -> Optional[str]:
+    if s.risk is None:
+        return "risk not assessed"
+    if s.risk == "high":
+        return "high risk must be escalated"
+    return None
+
+
 TRANSITIONS: dict[Phase, dict[Phase, Guard]] = {
     Phase.RECEIVED: {Phase.GATHERING: lambda s: None},
     Phase.GATHERING: {Phase.ASSESSING: lambda s: None if s.flags else "no findings gathered yet"},
     Phase.ASSESSING: {
-        Phase.DRAFTING: lambda s: "risk not assessed" if s.risk is None
-        else ("high risk must be escalated" if s.risk == "high" else None),
+        Phase.DRAFTING: _ready_to_draft,
         Phase.ESCALATED: lambda s: None if s.risk == "high" else "only high-risk tickets escalate",
     },
     Phase.DRAFTING: {Phase.AWAITING_REVIEW: lambda s: None if s.draft else "no draft written"},

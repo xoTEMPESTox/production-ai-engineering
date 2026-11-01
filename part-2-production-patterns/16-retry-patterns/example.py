@@ -148,7 +148,7 @@ class FakeBilling:
 
 
 if __name__ == "__main__":
-    now = [0.0]
+    now = [0.0]  # a fake clock: the demo moves time by setting now[0] (a list, so lambdas see the change)
 
     def fake_sleep(seconds: float) -> None:
         now[0] += seconds

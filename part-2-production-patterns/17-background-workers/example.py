@@ -150,7 +150,7 @@ def run_pool(worker: Worker, threads: int = 3) -> None:
 
 
 if __name__ == "__main__":
-    now = [0.0]
+    now = [0.0]  # a fake clock: the demo moves time by setting now[0] (a list, so lambdas see the change)
     queue = InMemoryQueue(clock=lambda: now[0], visibility_timeout_s=30, max_receives=3)
     runs: Counter = Counter()
 

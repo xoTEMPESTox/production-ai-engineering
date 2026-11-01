@@ -98,7 +98,7 @@ cd part-2-production-patterns/20-queues
 python example.py            # in-memory log, two consumers, one crash
 python -m pytest tests.py -q
 ```
-What to watch for: three conversations spread across partitions owned by two consumers. `consumer-2` handles conv-e's first event and dies before committing it. After the rebalance, `consumer-1` owns every partition, re-receives that event and skips it. The order seen per conversation matches the order sent. The corrupt event is dead-lettered, and conv-e's later "add cable" still goes through.
+What to watch for: three conversations spread across partitions owned by two consumers. `consumer-2` handles conv-e's first event and dies before committing it. After the rebalance, `consumer-1` owns every partition, re-receives that event and skips it: the `redelivered and skipped` line shows `1:0`, partition 1 at offset 0, and conv-e's cart has one dock, not two. The order seen per conversation matches the order sent. The corrupt event is dead-lettered, and conv-e's later "add cable" still goes through.
 
 Experiment: in `ConversationAgent.__call__`, remove the `if record.record_id in self.seen: return` check and run the tests. `test_crash_before_commit_redelivers_and_idempotency_absorbs_it` fails, because the redelivered "add dock" puts a second dock in the cart.
 

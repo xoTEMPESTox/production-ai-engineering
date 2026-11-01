@@ -21,8 +21,11 @@ from typing import Awaitable, Callable, Optional
 
 class TokenBucket:
     def __init__(self, per_minute: float, clock: Callable[[], float] = time.monotonic) -> None:
-        self.capacity, self.rate, self._clock = per_minute, per_minute / 60.0, clock
-        self.tokens, self._last = per_minute, clock()
+        self.capacity = per_minute
+        self.rate = per_minute / 60.0  # tokens added per second
+        self._clock = clock
+        self.tokens = per_minute
+        self._last = clock()
 
     def _refill(self) -> None:
         now = self._clock()
@@ -67,7 +70,9 @@ class Gateway:
 
     def __init__(self, providers: list[Provider], clock: Callable[[], float] = time.monotonic,
                  throttle_cooldown_s: float = 30.0) -> None:
-        self.providers, self._clock, self._cooldown = providers, clock, throttle_cooldown_s
+        self.providers = providers
+        self._clock = clock
+        self._cooldown = throttle_cooldown_s
 
     def complete(self, prompt: str, estimated_tokens: int) -> tuple[str, str]:
         now = self._clock()
@@ -175,7 +180,7 @@ class TieredCache:
 
 
 if __name__ == "__main__":
-    now = [0.0]
+    now = [0.0]  # a fake clock: the demo moves time by setting now[0] (a list, so lambdas see the change)
     clock = lambda: now[0]
     primary = Provider("provider-a", TokenBucket(600, clock), TokenBucket(400_000, clock), lambda p: "a")
     backup = Provider("provider-b", TokenBucket(300, clock), TokenBucket(200_000, clock), lambda p: "b")
@@ -189,11 +194,16 @@ if __name__ == "__main__":
     print(f"burst: {primary.name} served {primary.served}, {backup.name} served {backup.served}, "
           f"rejected {rejected} (the caller queues or sheds these)")
 
-    aimd, capacity = AIMDLimit(), 20
+    aimd = AIMDLimit()
+    capacity = 20  # the provider throttles above 20 concurrent calls
     for _ in range(400):
-        aimd.on_throttle() if aimd.limit > capacity else aimd.on_success()
+        if aimd.limit > capacity:
+            aimd.on_throttle()
+        else:
+            aimd.on_success()
         aimd.history.append(round(aimd.limit))
-    print("AIMD concurrency over time:", aimd.history[::25], "(sawtooth just under the provider's capacity)")
+    print("AIMD concurrency, every 25th of 400 steps:", aimd.history[::25],
+          "(sawtooth just under the provider's capacity)")
 
     async def demo_async() -> None:
         async def embed_batch(texts: list[str]) -> list[list[float]]:
