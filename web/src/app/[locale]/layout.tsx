@@ -39,7 +39,7 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             var theme = localStorage.getItem('theme');
-            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            if (theme === 'dark') {  // light by default; dark only when chosen with the toggle
               document.documentElement.classList.add('dark');
             }
           })();

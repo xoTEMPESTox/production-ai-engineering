@@ -7,6 +7,7 @@ import { LayerBadge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import versionsData from "@/data/generated/versions.json";
 import { MessageFlow } from "@/components/architecture/message-flow";
+import { RunReplay } from "@/components/architecture/run-replay";
 
 const LAYER_DOT_COLORS: Record<string, string> = {
   foundations: "bg-blue-500",
@@ -50,43 +51,12 @@ const DEMO_LOOP = [
   "        messages.append(result)",
 ];
 
-// Simplified from part-1-foundations/02-agent-loop/example.py.
-const HARNESSED_LOOP = [
-  "for step in range(1, budget.max_steps + 1):",
-  "    if clock() - started > budget.max_seconds:",
-  "        return stop(StopReason.TIME_BUDGET)",
-  "    turn = llm.complete(messages, tools)",
-  "    tokens += turn.input_tokens + turn.output_tokens",
-  "    if turn.final_answer is not None:",
-  "        return stop(StopReason.FINAL_ANSWER, turn.final_answer)",
-  "    if tokens > budget.max_tokens:",
-  "        return stop(StopReason.TOKEN_BUDGET)",
-  "    key = turn.tool_call.fingerprint()",
-  "    if seen[key] >= budget.max_identical_calls:",
-  "        return stop(StopReason.LOOP_DETECTED)",
-  "    seen[key] += 1",
-  "    observation, ok = execute(turn.tool_call)  # errors come back as text",
-  "    messages.append(Message(\"tool\", observation))",
-  "    record(step, TOOL_RESULT if ok else TOOL_ERROR, observation)",
-  "return stop(StopReason.MAX_STEPS)",
+// Slow-drifting glows behind the hero, one per pillar colour (the .drift animation is in globals.css).
+const GLOWS = [
+  { className: "-top-24 left-[5%] h-72 w-72 bg-indigo-500/20", style: { "--dx": "40px", "--dy": "20px", "--drift-duration": "14s" } },
+  { className: "top-0 right-[5%] h-64 w-64 bg-teal-500/15", style: { "--dx": "-30px", "--dy": "30px", "--drift-duration": "17s" } },
+  { className: "top-48 left-[40%] h-56 w-56 bg-rose-500/10", style: { "--dx": "20px", "--dy": "-25px", "--drift-duration": "20s" } },
 ];
-
-// Real output of `python example.py` in lesson 02 (first scenario, details shortened).
-const RUN_LOG = [
-  ["1", "model_turn", "Look up the plan."],
-  ["1", "tool_error", "get_plan -> ERROR: KeyError: 'unknown account acct-71'"],
-  ["2", "model_turn", "Typo in the ID; retry."],
-  ["2", "tool_result", "get_plan -> annual plan, purchased 2026-10-20"],
-  ["3", "model_turn", "Find the refund policy."],
-  ["3", "tool_result", "search_docs -> [billing-04] Annual plans can be refunded..."],
-  ["4", "model_turn", "Purchased 12 days ago; inside the window."],
-  ["4", "stopped", "final_answer"],
-];
-
-const RUN_LOG_COLORS: Record<string, string> = {
-  tool_error: "text-red-400",
-  stopped: "text-emerald-400",
-};
 
 function getVersionData(id: string) {
   return versionsData.versions.find((v) => v.id === id);
@@ -124,8 +94,17 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-20 pb-16">
       {/* Hero: what this is, and what one lesson folder contains */}
-      <section className="grid items-center gap-10 pt-8 sm:pt-16 lg:grid-cols-2">
-        <div>
+      <section className="relative isolate grid items-center gap-10 pt-8 sm:pt-16 lg:grid-cols-2">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          {GLOWS.map((glow, i) => (
+            <div
+              key={i}
+              className={cn("drift absolute rounded-full blur-3xl", glow.className)}
+              style={glow.style as React.CSSProperties}
+            />
+          ))}
+        </div>
+        <div className="fade-up">
           <p className="font-mono text-sm tracking-wide text-[var(--color-text-secondary)]">
             {t("eyebrow")}
           </p>
@@ -159,8 +138,12 @@ export default function HomePage() {
             {t("kit_title")}: part-1-foundations/02-agent-loop/
           </div>
           <ul className="divide-y divide-zinc-800/70">
-            {LESSON_FILES.map((file) => (
-              <li key={file.name} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:gap-4">
+            {LESSON_FILES.map((file, i) => (
+              <li
+                key={file.name}
+                className="fade-up flex flex-col gap-1 px-4 py-3 sm:flex-row sm:gap-4"
+                style={{ animationDelay: `${0.3 + i * 0.15}s` }}
+              >
                 <span className="w-36 shrink-0 font-mono text-sm text-zinc-100">{file.name}</span>
                 <span className="text-sm text-zinc-400">{t(file.key)}</span>
               </li>
@@ -170,7 +153,7 @@ export default function HomePage() {
       </section>
 
       {/* Three pillars */}
-      <section>
+      <section className="reveal">
         <div className="mb-6">
           <h2 className="text-2xl font-bold sm:text-3xl">{t("pillars_title")}</h2>
           <p className="mt-2 max-w-3xl text-[var(--color-text-secondary)]">{t("pillars_desc")}</p>
@@ -179,7 +162,7 @@ export default function HomePage() {
           {PILLARS.map((pillar) => (
             <div
               key={pillar.key}
-              className="flex flex-col rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5"
+              className="flex flex-col rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="flex items-center gap-2">
                 <span className={cn("h-2.5 w-2.5 rounded-full", pillar.accent)} />
@@ -206,12 +189,13 @@ export default function HomePage() {
       </section>
 
       {/* Demo loop vs harnessed loop */}
-      <section>
+      <section className="reveal">
         <div className="mb-6">
           <h2 className="text-2xl font-bold sm:text-3xl">{t("core_pattern")}</h2>
           <p className="mt-2 max-w-3xl text-[var(--color-text-secondary)]">
             {t("core_pattern_desc")}
           </p>
+          <p className="mt-2 max-w-3xl text-sm text-[var(--color-text-secondary)]">{t("replay_hint")}</p>
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
@@ -221,21 +205,7 @@ export default function HomePage() {
               <MessageFlow />
             </div>
           </div>
-          <div className="flex min-w-0 flex-col gap-4">
-            <CodePane title={t("harness_label")} lines={HARNESSED_LOOP} />
-            <div>
-              <p className="mb-2 text-sm text-[var(--color-text-secondary)]">{t("harness_keeps")}</p>
-              <div className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs leading-relaxed">
-                {RUN_LOG.map(([step, kind, detail], i) => (
-                  <div key={i} className="whitespace-nowrap">
-                    <span className="text-zinc-500">step {step} </span>
-                    <span className={cn("inline-block w-24", RUN_LOG_COLORS[kind] ?? "text-zinc-300")}>{kind}</span>
-                    <span className="text-zinc-400">{detail}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <RunReplay />
         </div>
         <p className="mt-4 text-sm">
           <Link href={`/${locale}/f02`} className="underline underline-offset-4 hover:opacity-80">
@@ -245,7 +215,7 @@ export default function HomePage() {
       </section>
 
       {/* Curriculum, grouped by part */}
-      <section>
+      <section className="reveal">
         <div className="mb-6">
           <h2 className="text-2xl font-bold sm:text-3xl">{t("learning_path")}</h2>
           <p className="mt-2 max-w-3xl text-[var(--color-text-secondary)]">
@@ -273,7 +243,7 @@ export default function HomePage() {
                       key={vid}
                       href={`/${locale}/${vid}`}
                       className={cn(
-                        "group block rounded-lg border bg-[var(--color-bg)] p-4 transition-colors",
+                        "group block rounded-lg border bg-[var(--color-bg)] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
                         LAYER_BORDER_COLORS[layer.id]
                       )}
                     >
@@ -303,7 +273,7 @@ export default function HomePage() {
       </section>
 
       {/* Credits */}
-      <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-6 sm:p-8">
+      <section className="reveal rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-6 sm:p-8">
         <h2 className="text-xl font-bold sm:text-2xl">{t("credits_title")}</h2>
         <p className="mt-3 max-w-3xl text-sm text-[var(--color-text-secondary)] sm:text-base">
           {t("credits_body_1")}

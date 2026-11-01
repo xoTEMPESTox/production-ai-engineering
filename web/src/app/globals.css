@@ -572,3 +572,50 @@ body {
   color: #86efac;
   background-color: rgba(34, 197, 94, 0.15);
 }
+
+/* =====================================================
+   HOME PAGE MOTION (CSS only, so content shows without JS)
+   ===================================================== */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drift {
+  50% {
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
+
+.drift {
+  animation: drift var(--drift-duration, 16s) ease-in-out infinite;
+}
+
+/* Scroll reveals only where scroll-driven animations are supported;
+   everywhere else the sections are simply visible. */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: fade-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 30%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up,
+  .drift,
+  .reveal {
+    animation: none;
+  }
+}
