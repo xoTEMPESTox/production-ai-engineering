@@ -52,12 +52,12 @@ The flow in `ResearchAssistant.run`, with the lesson behind each piece:
 |---|---|---|
 | Plan | the planner returns `Plan(sub_questions=[...])`, validated (at most 4); an invalid plan degrades to one step | 06, 03 |
 | Retrieve | per sub-question, BM25 over **this tenant's** documents only | 05 |
-| Quarantine | documents with injection phrases are removed and logged, never shown to the model | 29 |
-| Mark | the remaining sources are wrapped in `<untrusted source="...">` blocks, marked as data | 29 |
+| Quarantine | documents matching injection phrases are dropped and logged for review, never shown to the model (stricter than Lesson 29; see Tradeoffs) | 29 |
+| Mark | the remaining sources are wrapped in `<untrusted source="...">` blocks, marked as data; a `</untrusted>` inside a document is escaped so it can't close its block early | 29 |
 | Research | each sub-agent sees only its sub-question and its sources, and returns a `Finding` (answer + citations) | 07 |
 | Validate | schema check, plus "citations within the sources this sub-agent was given"; one repair with the exact error; then fail closed | 03 |
 | Fan out | sub-agents run under a semaphore (2 at a time), each with a timeout | 11 |
-| Synthesise | the writer sees only verified findings; `missing` is computed in code and appended as "Not verified: …" | 07, 09 |
+| Synthesise | the writer sees only verified findings; `missing` is computed in code and appended as "Not verified: …"; if the writer cites a source no finding cited, its text is replaced by the findings themselves | 07, 09 |
 | Budget and cost | every model call is charged against `max_calls` and priced | 02, 28 |
 | Trace | every step (plan, retrieval, each call, rejections, failures, report) lands in `harness.trace` | 22 |
 | Evaluate | `score(report, required_facts, expected_citations)` is the golden-set check | 09, 27 |
@@ -80,7 +80,7 @@ The model here is `RuleBasedLLM`, a deterministic stand-in that answers with the
 * **Single retrieval**: one call fewer, and fine for single-part questions. Route simple questions straight to Lesson 03's single grounded answer.
 
 ### Quarantining suspicious documents vs. marking them and passing them through
-* **Quarantine** (this system): the injected text never reaches the model. A false positive drops a legitimate document, which is why quarantined IDs are logged for review.
+* **Quarantine** (this system): the injected text never reaches the model. A false positive drops a legitimate document, which is why quarantined IDs are logged for review. This goes further than Lesson 29, where phrase matching is a signal only, because a paraphrase slips past any pattern list. So the quarantine is not the defence here: a paraphrased injection still arrives marked as data, can't add a citation that passes the checks, and finds no side-effecting tools to call.
 * **Mark and pass through**: nothing is lost, but the defence relies on the model ignoring instructions in data. Acceptable only when the agent has no side-effecting tools (Lesson 29's taint rule).
 
 ### A partial report vs. no report
@@ -92,7 +92,7 @@ The model here is `RuleBasedLLM`, a deterministic stand-in that answers with the
 ## Failure Cases to Watch For
 1. **Sub-questions that silently disappear**: a failed sub-agent that leaves no trace in the report.
 2. **Writers that fill gaps**: a synthesis step allowed to "complete" missing parts from general knowledge.
-3. **Citations that drift**: the writer cites an ID that no verified finding cited. Check them (Lesson 07).
+3. **Citations that drift**: the writer cites an ID that no verified finding cited. Check them in code (Lesson 07); this system falls back to the verified findings when they drift.
 4. **Tenant leaks through shared corpora**: any search path without the tenant filter.
 5. **Injected documents treated as instructions**, or quarantined without anyone looking at why.
 6. **Unbounded plans and fan-out**: twenty sub-questions, each with a retry, against one rate limit (Lesson 30).
