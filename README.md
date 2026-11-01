@@ -52,15 +52,16 @@ production-ai-engineering/
 │   └── ...                         # Redis checkpoints, Postgres state database, queues
 │
 ├── part-3-complete-systems/        # Combined production architectures (c01–c04)
-│   ├── healthcare-platform/        # Flagship multi-service HIPAA-inspired platform
+│   ├── healthcare-platform/        # Planned flagship (not yet written)
 │   └── ...                         # Support engine, research pipeline, coding agent
 │
 ├── part-4-infrastructure/          # Multi-container local environments (i01)
-│   └── local-compose-deployment/   # Orchestrated docker compose workspace specs
+│   └── local-compose-deployment/   # Planned Docker Compose setup (not yet written)
 │
-├── common/                         # Shared helper libraries
 └── web/                            # Interactive Next.js visualizer documentation dashboard
 ```
+
+Every lesson is self-contained: it imports nothing from other lessons, so you can open any folder and run it.
 
 Each lesson in Part 1 and Part 2 contains:
 1. **README.md**: Conceptual definitions, naive vs. production architectures, and design tradeoffs.
@@ -70,15 +71,31 @@ Each lesson in Part 1 and Part 2 contains:
 
 ---
 
+## 🏁 Getting Started
+
+You need Python 3.10 or newer (Lesson 21 uses `contextlib.aclosing`, added in 3.10).
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+cd part-1-foundations/02-agent-loop
+python example.py                  # a short demo
+python -m pytest tests.py -q       # or: python tests.py
+```
+
+No API key, network or running server is needed. Model calls go through a small `LLMClient` interface with a scripted fake, and the Redis and PostgreSQL lessons use in-memory versions of the same interface. To also test Lessons 18 and 19 against real servers, set `PAIE_REDIS_URL` or `PAIE_POSTGRES_URL`; otherwise those tests are skipped. Each lesson's README ends with a **Try It** section: what to look for in the output, and a one-line change that makes a named test fail.
+
+---
+
 ## 📚 Final Curriculum
 
 > [!NOTE]
-> **Roadmap Status**: Lessons **01–30** and three of the four complete systems are implemented, each with a runnable `example.py` and offline `tests.py`. The Healthcare Platform and Local Compose Deployment are still skeletons. The curriculum covers three pillars throughout: **Agent** (loops, tools, planning, coordination), **RAG** (retrieval, grounding, citations) and **Harness** (budgets, validation, evals, traces, cost).
->
-> **Multilingual Disclaimer**: All non-English versions of the documentation site (Chinese and Japanese) are machine/LLM-generated translations of the core English curriculum.
+> **Roadmap Status**: Lessons **01–30** and three of the four complete systems are implemented, each with a runnable `example.py` and offline `tests.py`. The Healthcare Platform and Local Compose Deployment are still skeletons. The curriculum covers three pillars throughout: **Agent** (loops, tools, planning, coordination), **RAG** (retrieval, grounding, citations) and **Harness**, meaning everything around the model call that makes it safe to run (budgets, validation, evals, traces, cost).
 
 ### PART I — Foundations (Learn AI Systems)
-Goal: Learn how an AI system thinks before learning how it survives production. These chapters are under 200 LOC, runnable, concept-focused, and highly educational.
+Goal: Learn how an AI system thinks before learning how it survives production. Each chapter's example is about 140–290 lines: runnable, concept-focused, and highly educational.
 
 | # | Chapter | Key Focus / Primitives | Status |
 |---|---------|------------------------|--------|
@@ -148,12 +165,9 @@ We provide a beautiful, dynamic developer dashboard to visualize how the agent l
 
 ### Running the UI Locally
 
-1. **Install Python dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+The UI needs only Node.js; it reads the lesson files directly.
 
-2. **Setup and run the Next.js Frontend**:
+1. **Setup and run the Next.js Frontend**:
    ```bash
    cd web
    npm install
@@ -161,7 +175,7 @@ We provide a beautiful, dynamic developer dashboard to visualize how the agent l
    ```
    Open [http://localhost:3000](http://localhost:3000) in your browser to explore the interactive lessons.
 
-3. **Re-compiling Content**:
+2. **Re-compiling Content**:
    If you modify any lesson code or READMEs, compile the database by running:
    ```bash
    npm run extract
@@ -171,21 +185,21 @@ We provide a beautiful, dynamic developer dashboard to visualize how the agent l
 
 ## 🚀 Future Vision
 
-Production AI Engineering is designed to work in two modes:
+Production AI Engineering is planned to work in two modes. **Learning Mode works today; Interactive Mode is not built yet.**
 
-### 1. Learning Mode
+### 1. Learning Mode (available now)
 * Runs entirely statically from **GitHub Pages**.
 * No backend or Docker setup required.
 * Read conceptual documentation, study source code implementations, browse architecture maps, and view pre-rendered animations/traces directly in the browser.
 
-### 2. Interactive Mode
-Launch any complete production example or service locally with a single command:
+### 2. Interactive Mode (planned)
+The plan is to launch a complete example locally with a single command:
 ```bash
 docker compose up
 ```
-The documentation website automatically pings and detects the running local backend (`/health` endpoint) and transforms the static textbook page into a **live, interactive playground**.
+The documentation site would then detect the running backend (through a `/health` endpoint) and turn the static page into a **live, interactive playground**.
 
-Interactive features enabled dynamically include:
+Planned interactive features:
 * **Live Workflow Execution**: Run prompts and watch the agent navigate tools in real-time.
 * **Background Worker & Queue Monitoring**: Inspect pending task queues and follow background workers processing asynchronous workflows.
 * **Retry & Compaction Visualization**: Watch model fallback cascades, exponential backoff timers, and memory compaction events occur on actual runs.
@@ -193,11 +207,7 @@ Interactive features enabled dynamically include:
 * **OpenTelemetry Trace Telemetry**: Profile latencies, query timings, and prompt token costs directly in the UI.
 * **API Playground & Swagger Integration**: Test individual microservice endpoints directly from the interactive docs.
 
-#### Launching a Live Demo
-When viewing a lesson, simply click the **🚀 Launch Live Demo** button. The documentation will explain:
-> *"Run `docker compose up` in `examples/healthcare/` (or the relevant chapter directory) and refresh this page."*
-
-Once the site successfully pings and identifies the backend container, the static page automatically switches to live interactive mode.
+Each lesson page would get a **🚀 Launch Live Demo** button explaining which folder to run `docker compose up` in; once the site detects the backend, the page switches to live mode.
 
 ---
 
