@@ -1,5 +1,7 @@
 # Healthcare Platform
 
+> **Not yet written.** This is a placeholder from the original course outline. The finished systems in Part 3 are Customer Support, Research Assistant and Coding Agent.
+
 Welcome to this lesson on **Healthcare Platform** in Production AI Engineering.
 
 ## Why this concept exists?

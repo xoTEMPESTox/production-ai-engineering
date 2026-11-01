@@ -109,4 +109,4 @@ What to watch for: in the burst, provider A serves about 700, provider B about 3
 
 Experiment: in `TieredCache.get_or_compute`, disable the in-flight check (`if key in self._inflight:` → `if False:`) and run the tests. `test_concurrent_misses_make_one_upstream_call` fails. All 25 concurrent requests for the same question now start their own model call (a cache stampede), and the shared in-flight bookkeeping trips over itself with a `KeyError`. Both show why concurrent misses need exactly one owner.
 
-**Next:** Part 3 puts the lessons together: complete systems, starting with the flagship platform, where every pattern from Parts 1 and 2 meets the others.
+**Next:** Part 3 puts the lessons together in complete systems: a customer support agent, a research assistant and a coding agent, each built from the patterns in Parts 1 and 2.

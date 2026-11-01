@@ -1,5 +1,7 @@
 # Local Compose Deployment
 
+> **Not yet written.** This is a placeholder from the original course outline. Lessons 18, 19 and 23 already cover the Redis, PostgreSQL and Docker pieces it will combine.
+
 Welcome to this lesson on **Local Compose Deployment** in Production AI Engineering.
 
 ## Why this concept exists?
