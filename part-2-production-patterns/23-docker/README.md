@@ -93,7 +93,7 @@ COPY --chown=app:app index/ ./index/              # baked: versioned with the co
 3. **Running as root.**
 4. **Shell-form entrypoints**: `SIGTERM` doesn't reach the app, so in-flight requests are cut at every deploy.
 5. **Health checks that check the wrong thing**: liveness checks that call dependencies (causing restart storms when a database blips), or readiness that ignores the index.
-6. **Artifacts that don't match the code**: a mounted index from another version, or no checksum check.
+6. **Artifacts that don't match the code**: a mounted index from another version, or no checksum check. A related trap: a new, empty *named* Docker volume is pre-filled with the image's own files at that path, so "mounted" can quietly mean "the baked-in copy". Check `index_version` on `/readyz` after every mount change.
 7. **Multi-gigabyte images** with model weights baked in that change often: slow pulls and slow scale-up.
 8. **Cache-busting layer order**: every commit reinstalls every dependency.
 

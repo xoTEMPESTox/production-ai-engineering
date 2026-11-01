@@ -109,8 +109,30 @@ class TestSqliteStore(StoreBehaviour, unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("PAIE_POSTGRES_URL"), "set PAIE_POSTGRES_URL to run against PostgreSQL")
 class TestPostgresStore(StoreBehaviour, unittest.TestCase):
-    def make(self) -> PostgresStateStore:
-        return PostgresStateStore(os.environ["PAIE_POSTGRES_URL"], schema=f"paie_test_{uuid.uuid4().hex[:8]}")
+    def make(self, schema: str = "") -> PostgresStateStore:
+        return PostgresStateStore(os.environ["PAIE_POSTGRES_URL"], schema=schema or f"paie_test_{uuid.uuid4().hex[:8]}")
+
+    def test_skip_locked_claims_across_connections(self) -> None:
+        schema = f"paie_test_{uuid.uuid4().hex[:8]}"
+        producer = self.make(schema)
+        expected = sorted(producer.enqueue(f"r{i}") for i in range(40))
+        claimed, lock = [], threading.Lock()
+
+        def worker(name: str) -> None:
+            store = self.make(schema)  # its own connection, like a separate worker process
+            for _ in range(100):
+                job = store.claim_job(name)
+                if job is None:
+                    return
+                with lock:
+                    claimed.append(job[0])
+
+        threads = [threading.Thread(target=worker, args=(f"w{i}",)) for i in range(4)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        self.assertEqual(sorted(claimed), expected)  # every job once, none twice
 
 
 if __name__ == "__main__":

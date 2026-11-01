@@ -1,5 +1,6 @@
 import os
 import threading
+import time
 import unittest
 import uuid
 
@@ -112,6 +113,21 @@ class TestCheckpointsAndKeys(unittest.TestCase):
 class TestRealRedisLocks(LockBehaviour, unittest.TestCase):
     def make(self):
         return RedisAdapter(os.environ["PAIE_REDIS_URL"]), Keys(env=f"test-{uuid.uuid4().hex[:8]}"), None
+
+    def test_lua_scripts_and_expiry_on_a_real_server(self) -> None:
+        store, keys, _ = self.make()
+        locks, checkpoints = RunLock(store, keys), CheckpointStore(store, keys, ttl_ms=5_000)
+        old = locks.acquire("run-1", 200)
+        self.assertTrue(locks.refresh("run-1", old, 300))       # compare-and-pexpire, owner
+        time.sleep(0.4)                                        # real TTL runs out
+        new = locks.acquire("run-1", 30_000)
+        self.assertIsNotNone(new)
+        self.assertFalse(locks.refresh("run-1", old, 30_000))  # stale token: no extension
+        self.assertFalse(locks.release("run-1", old))          # stale token: no delete
+        self.assertTrue(locks.release("run-1", new))
+        checkpoints.save("run-1", 1, {"n": 1})
+        self.assertEqual(checkpoints.load("run-1")["state"], {"n": 1})
+        self.assertGreater(store.pttl(keys.latest("run-1")), 0)
 
 
 if __name__ == "__main__":
