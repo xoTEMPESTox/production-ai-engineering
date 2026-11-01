@@ -156,7 +156,7 @@ class ApprovalGate:
 
 
 def draft_similarity(draft: str, final: str) -> float:
-    """1.0 = signed unchanged. Track 1 - similarity as the 'human edit rate' (Lesson 26)."""
+    """1.0 = signed unchanged. 1 - similarity is the edit size; the share of drafts with any edit is the human edit rate (Lesson 26)."""
     return difflib.SequenceMatcher(None, draft, final).ratio()
 
 

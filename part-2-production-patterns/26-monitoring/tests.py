@@ -36,6 +36,13 @@ class TestMetrics(unittest.TestCase):
         with self.assertRaises(ValueError):
             metrics.inc("requests", user_id="u-123")
 
+    def test_each_label_combination_is_its_own_series(self) -> None:
+        metrics = Metrics(Clock())
+        metrics.inc("requests", route="chat")
+        metrics.inc("requests", 2, route="search")
+        self.assertEqual(metrics.total("requests", HOUR, route="chat"), 1)
+        self.assertEqual(metrics.total("requests", HOUR), 3)
+
     def test_windows_only_count_their_own_minutes(self) -> None:
         clock = Clock()
         metrics = run(120, per_minute=10, clock=clock)
@@ -84,6 +91,12 @@ class TestQualityAlerts(unittest.TestCase):
     def test_too_few_requests_never_alert(self) -> None:
         metrics = run(1, per_minute=10, schema_failures=5, fallbacks=5)
         self.assertEqual(evaluate_rules(metrics, SLO()), [])
+
+    def test_human_edit_rate_is_the_share_of_reviewed_drafts_changed(self) -> None:
+        worse = run(60, drafts_reviewed=5, drafts_edited=2)  # reviewers change 40% of drafts
+        self.assertIn("human_edit_rate", names(evaluate_rules(worse, SLO())))
+        usual = run(60, drafts_reviewed=5, drafts_edited=1)  # 20%
+        self.assertNotIn("human_edit_rate", names(evaluate_rules(usual, SLO())))
 
     def test_empty_retrievals_are_watched_too(self) -> None:
         metrics = run(60, empty_retrievals=4)  # 20%: the index no longer covers what people ask

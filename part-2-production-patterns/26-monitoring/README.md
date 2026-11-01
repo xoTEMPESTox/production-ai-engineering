@@ -1,6 +1,6 @@
 # Lesson 26: Monitoring
 
-Learn how to know an AI service is healthy without reading every trace: SLOs and error budgets, burn-rate alerts checked over two windows, quality signals like schema-failure, fallback and empty-retrieval rates, one alert per incident, and input drift.
+Learn how to know an AI service is healthy without reading every trace: SLOs (service level objectives) and error budgets, burn-rate alerts checked over two windows, quality signals like schema-failure, fallback, empty-retrieval and human-edit rates, one alert per incident, and input drift.
 
 > **Pillars:** Harness · RAG · Agent  |  **Harness layer:** monitoring, meaning the few numbers that say whether the system is doing its job right now
 >
@@ -47,7 +47,7 @@ async def watch(request, call_next):
 ---
 
 ## How is this solved in production?
-**1. Counters per minute, with bounded labels.** `Metrics` counts events per minute and keeps latency samples. Labels are restricted to small, fixed sets (`route`, `model`, `prompt_version`), and `user_id` is refused with a pointer to traces. A real time-series store works the same way: a series per label combination, so the number of combinations is the cost.
+**1. Counters per minute, with bounded labels.** `Metrics` counts events per minute, one series per label combination, and keeps latency samples; `total()` sums every series or only those with given labels. Labels are restricted to small, fixed sets (`route`, `model`, `prompt_version`), and `user_id` is refused with a pointer to traces. A real time-series store works the same way: a series per label combination, so the number of combinations is the cost.
 
 **2. An SLO with an error budget.** "99% of requests succeed over 30 days" means a 1% error budget. The **burn rate** is how fast you're spending it: `(errors / requests) / (1 − objective)`. A burn rate of 1 uses the budget exactly over the period, and 30% errors is a burn rate of 30.
 
@@ -59,16 +59,17 @@ for severity, long_s, short_s, threshold in (("page", 1h, 5m, 14.4), ("ticket", 
 ```
 The long window says the problem is real and not a blip. The short window says it's still happening, so the alert clears within minutes of recovery instead of hours. These thresholds are the commonly used defaults for a 30-day period: a page when about 2% of the monthly budget burns in an hour, a ticket when about 5% burns in six hours. In the demo, a hard outage (30% errors) pages about 29 minutes in, and the page resolves minutes after the provider recovers. A five-minute blip of total failure doesn't page at all.
 
-**4. AI quality signals as first-class alerts.** Over the last hour, and only with at least `min_requests` requests:
+**4. AI quality signals as first-class alerts.** Over the last hour, and only with at least `min_requests` requests (and, for the edit rate, at least 50 reviewed drafts):
 
 | Signal | Source | Limit | Means |
 |---|---|---|---|
 | schema-failure rate | Lesson 03 validation | 2% → ticket | a prompt or model change broke the output contract |
 | fallback rate | Lesson 14 chain | 10% → page | the primary model is failing; users get degraded answers |
 | empty-retrieval rate | Lesson 05 search | 15% → ticket | users ask about things the index doesn't cover |
-| p95 latency | request timings | 3,000 ms → ticket | slower answers (often a bigger context, or a slower model) |
+| human edit rate | Lesson 08 sign-off: the share of reviewed drafts a person changed | 30% → ticket | answers got worse in a way no status code or schema shows |
+| p95 latency (95% of requests are faster than this) | request timings | 3,000 ms → ticket | slower answers (often a bigger context, or a slower model) |
 
-The prompt change in the demo (hours 40–44) never touches the error rate, yet it opens one schema-failure ticket. Human edit rate (Lesson 08), groundedness failures (Lesson 09) and cost per request (Lesson 28) belong on the same dashboard.
+The prompt change in the demo (hours 40–44) never touches the error rate, yet it opens one schema-failure ticket. The weaker model at hours 45–47 breaks nothing at all: no errors, valid JSON. Only the reviewers notice, changing 3 drafts in 5 instead of the usual 1 in 5, and the edit-rate ticket is the one alert that fires. Groundedness failures (Lesson 09) and cost per request (Lesson 28) belong on the same dashboard.
 
 **5. One notification per incident.** `AlertManager` notifies when an alert *starts* firing and once when it resolves. It never repeats on every evaluation. Pages go to whoever is on call, tickets to the team queue.
 
@@ -111,7 +112,7 @@ cd part-2-production-patterns/26-monitoring
 python example.py            # simulates two days of traffic in well under a second
 python -m pytest tests.py -q
 ```
-What to watch for: the `user_id` label is refused. During the hour-30 outage, the latency ticket and the fallback page fire first, then the fast-burn page about 29 minutes in, then the slow-burn ticket. All four resolve within an hour of recovery. The bad prompt at hour 40 opens exactly one schema-failure ticket, which resolves when it's reverted. And topic PSI jumps from 0.0 to about 1.57 after the launch.
+What to watch for: the `user_id` label is refused. During the hour-30 outage, the latency ticket and the fallback page fire first, then the fast-burn page about 29 minutes in, then the slow-burn ticket. All four resolve within an hour of recovery. The bad prompt at hour 40 opens exactly one schema-failure ticket, which resolves when it's reverted. The weaker model at hour 45 opens one human-edit-rate ticket about 20 minutes in, and nothing else. And topic PSI jumps from 0.0 to about 1.57 after the launch.
 
 Experiment: in `evaluate_rules`, drop the short-window condition (`and short_rate > threshold`) and run the tests. `test_alert_clears_soon_after_recovery` fails: ten minutes after the provider recovered, the page is still firing, because the one-hour window remembers the outage.
 

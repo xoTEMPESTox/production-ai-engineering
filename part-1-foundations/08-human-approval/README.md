@@ -72,7 +72,7 @@ record(signed_by=decision.actor, final_draft=draft, changes=["amount 18000 -> 12
 
 **7. The audit trail is append-only.** Every event (`requested`, `escalated`, `edited`, `rejected`, `executed`, `expired`) is appended with the actor, a timestamp and the detail, including the exact change. Nothing is ever rewritten.
 
-**8. Draft → sign-off.** The stored result is the signed final draft plus the signer, not the AI's draft. `draft_similarity` measures how much the person changed it. Averaged over many requests, one minus similarity is the **human edit rate**, a direct quality signal for the model (Lesson 26).
+**8. Draft → sign-off.** The stored result is the signed final draft plus the signer, not the AI's draft. `draft_similarity` measures how much the person changed it: one minus similarity is the size of the edit. Across many requests, the share of drafts a person changed at all is the **human edit rate**, a direct quality signal for the model (Lesson 26 alerts on it). Track both: a rising rate of small edits and a few complete rewrites call for different fixes.
 
 When the agent resumes, it gets `Outcome.observation`, for example "Refund edited by a person: 120.00 refunded to acct-17", as its next observation, just like a tool result in Lesson 02.
 

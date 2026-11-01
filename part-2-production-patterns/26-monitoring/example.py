@@ -6,8 +6,8 @@ counted per minute with a small, fixed set of labels (no user ids: that
 would explode cardinality). An SLO turns "reliable enough" into an error
 budget, and alerts fire on how fast the budget is burning, checked over a
 long and a short window so they're both sensitive and quick to clear.
-AI-specific quality signals (schema failures, fallbacks, empty retrievals)
-get their own alerts with a minimum volume, each incident alerts once, and
+AI-specific quality signals (schema failures, fallbacks, empty retrievals,
+and the human edit rate) get their own alerts with a minimum volume, each incident alerts once, and
 input drift is measured with the population stability index (PSI).
 """
 from __future__ import annotations
@@ -25,7 +25,9 @@ class Metrics:
 
     def __init__(self, clock: Callable[[], float]) -> None:
         self._clock = clock
-        self._counts: dict[tuple[str, int], float] = defaultdict(float)
+        # (name, minute) -> {label combination: count}. Each combination is its own series.
+        self._counts: dict[tuple[str, int], dict[tuple[tuple[str, str], ...], float]] = defaultdict(
+            lambda: defaultdict(float))
         self._latencies: dict[int, list[float]] = defaultdict(list)
 
     @staticmethod
@@ -36,15 +38,23 @@ class Metrics:
 
     def inc(self, name: str, value: float = 1.0, **labels: str) -> None:
         self._check(labels)
-        self._counts[(name, int(self._clock() // 60))] += value
+        series = tuple(sorted(labels.items()))
+        self._counts[(name, int(self._clock() // 60))][series] += value
 
     def observe_latency(self, ms: float, **labels: str) -> None:
         self._check(labels)
         self._latencies[int(self._clock() // 60)].append(ms)
 
-    def total(self, name: str, window_s: float) -> float:
+    def total(self, name: str, window_s: float, **labels: str) -> float:
+        """Sum over the window, across every series whose labels include `labels`."""
         now = int(self._clock() // 60)
-        return sum(self._counts.get((name, m), 0.0) for m in range(now - int(window_s // 60) + 1, now + 1))
+        wanted = set(labels.items())
+        total = 0.0
+        for minute in range(now - int(window_s // 60) + 1, now + 1):
+            for series, value in self._counts.get((name, minute), {}).items():
+                if wanted <= set(series):
+                    total += value
+        return total
 
     def p95(self, window_s: float) -> float:
         now = int(self._clock() // 60)
@@ -87,6 +97,12 @@ def evaluate_rules(m: Metrics, slo: SLO, min_requests: int = 200) -> list[Alert]
             rate = m.total(name, HOUR) / requests
             if rate > limit:
                 alerts.append(Alert(f"{name}_rate", severity, f"{name} at {rate:.1%} over the last hour (limit {limit:.0%})"))
+        reviewed = m.total("drafts_reviewed", HOUR)
+        if reviewed >= 50:  # share of reviewed drafts a person changed (Lesson 08)
+            edit_rate = m.total("drafts_edited", HOUR) / reviewed
+            if edit_rate > 0.30:
+                alerts.append(Alert("human_edit_rate", "ticket",
+                                    f"reviewers changed {edit_rate:.0%} of drafts over the last hour (limit 30%)"))
         if m.p95(HOUR) > 3000:
             alerts.append(Alert("latency_p95", "ticket", f"p95 {m.p95(HOUR):.0f} ms over the last hour (SLO 3000 ms)"))
     return alerts
@@ -134,6 +150,7 @@ if __name__ == "__main__":
         hour = minute / 60
         outage = 30 <= hour < 32         # provider degraded
         bad_prompt = 40 <= hour < 44     # a prompt change that breaks the JSON
+        worse_model = 45 <= hour < 47    # valid JSON, no errors, but weaker answers
         for i in range(20):
             metrics.inc("requests")
             metrics.observe_latency(1200 + (i * 37) % 900 + (2500 if outage else 0))
@@ -143,6 +160,10 @@ if __name__ == "__main__":
                 metrics.inc("fallbacks")
             if bad_prompt and i % 12 == 0:
                 metrics.inc("schema_failures")
+            if i % 4 == 1:  # a person reviews 1 draft in 4
+                metrics.inc("drafts_reviewed")
+                if i == 1 or (worse_model and i < 10):  # usually 1 review in 5 changes the draft; 3 in 5 here
+                    metrics.inc("drafts_edited")
         if minute % 5 == 4:
             manager.update(evaluate_rules(metrics, slo), at=f"h{hour:05.2f}")
     for note in manager.notifications:
