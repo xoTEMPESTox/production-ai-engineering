@@ -150,16 +150,19 @@ def repair(project: Path, coder: CoderLLM, max_attempts: int = 4) -> Outcome:
         result = workspace.run_tests()
         log.append(f"baseline: {'pass' if result.passed else 'fail'}")
         attempts = 0
+        feedback = result.output
         while not result.passed and attempts < max_attempts:
             attempts += 1
             files = {p.name: workspace.read(p.name) for p in sorted(workspace.root.glob("*.py"))}
-            patch = coder.propose(result.output, files)
+            patch = coder.propose(feedback, files)
             try:
                 workspace.write(patch.path, patch.content)
             except ToolDenied as exc:
                 log.append(f"attempt {attempts}: denied ({exc})")
-                continue  # the refusal goes back to the model as the next observation
+                feedback = f"DENIED: {exc}"  # the refusal goes back to the model as the next observation
+                continue
             result = workspace.run_tests()
+            feedback = result.output
             log.append(f"attempt {attempts}: patched {patch.path} ({patch.note}) -> {'pass' if result.passed else 'fail'}")
         return Outcome(result.passed, attempts, workspace.diff() if result.passed else "", log)
     finally:

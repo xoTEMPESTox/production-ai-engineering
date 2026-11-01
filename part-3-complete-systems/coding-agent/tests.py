@@ -62,6 +62,20 @@ class TestRepairLoop(TempProject):
         self.assertNotIn("test_pricing.py", outcome.diff)
         self.assertIn("// 100", outcome.diff)
 
+    def test_a_refusal_is_what_the_model_sees_next(self) -> None:
+        class Recording(ScriptedCoder):
+            def __init__(self) -> None:
+                super().__init__()
+                self.seen: list[str] = []
+
+            def propose(self, failure, files):
+                self.seen.append(failure)
+                return super().propose(failure, files)
+
+        coder = Recording()
+        repair(make_project(self.folder), coder)
+        self.assertIn("read-only", coder.seen[1])
+
     def test_attempt_budget_ends_a_hopeless_run_with_nothing_to_merge(self) -> None:
         class Stubborn:
             def propose(self, failure, files):  # a real change, but a wrong one

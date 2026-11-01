@@ -2,7 +2,7 @@
 
 A complete agent that fixes a failing test inside a sandbox it can't escape or cheat: a disposable copy of the project, path containment, read-only tests, a single allowed command with a timeout and no secrets, a bounded test-and-repair loop, and a diff for a person to review.
 
-> **Pillars:** Agent · Harness  |  **Built from:** Lessons 02, 04, 08, 09, 10, 14, 29
+> **Pillars:** Agent · Harness  |  **Built from:** Lessons 02, 04, 08, 09, 14, 29
 >
 > *Let it try anything inside the box, make sure the box holds, and have a person merge the result.*
 
@@ -48,8 +48,8 @@ def fix(repo):
 ## How is this solved in production?
 | Concern | How | Lesson |
 |---|---|---|
-| Isolation | `Workspace` copies the project to a temporary folder (the role a git worktree or container plays) and `discard()`s it afterwards | 10 |
-| Containment | every path is resolved and must stay under the workspace root; `../../etc/passwd` and absolute paths raise `ToolDenied` | 29 |
+| Isolation | `Workspace` copies the project to a temporary folder (the role a git worktree or container plays) and `discard()`s it afterwards | new here (29 names sandboxing) |
+| Containment | every path is resolved and must stay under the workspace root; `../../etc/passwd` and absolute paths raise `ToolDenied` | new here (29's least privilege, applied to paths) |
 | No cheating | `test_*` files are read-only to the agent: "tests are read-only, fix the code instead" | 09 |
 | One command | `run_tests()` is the only execution tool: `python -m unittest` with no shell, a timeout and bounded output | 04, 29 |
 | No secrets | `sandbox_env()` passes only what Python needs to start; a test inside the sandbox confirms a fake API key isn't visible | 29 |
@@ -78,7 +78,7 @@ followed by the one-line diff (`// 10` → `// 100`). The original project is un
 * **Container or VM**: the strongest isolation (no network, a read-only base, resource limits). It costs more to start, and it's what to use when running untrusted generated code for real.
 
 ### Read-only tests vs. letting the agent write tests
-* **Read-only** (this system): success can't be faked. The agent can't add the regression test a good engineer would add.
+* **Read-only** (this system): the agent can't make the tests pass by editing them. It can still game them from the code side, for example by special-casing the exact inputs a test uses, which is one reason a person reviews the diff. It also can't add the regression test a good engineer would add.
 * **New tests allowed, existing ones protected**: lets the agent contribute coverage. Review new tests as carefully as code, because a weak new test proves nothing.
 
 ### An attempt budget vs. running until green
