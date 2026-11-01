@@ -2,6 +2,10 @@
 
 Learn how to represent, update, and manage agent state in production AI systems.
 
+> **Pillars:** Harness · Agent  |  **Harness layer:** state, meaning the record of what the agent has done and what it knows
+>
+> *Never change state in place: every update is a new version you can audit and roll back.*
+
 ## Why does this exist?
 Agentic applications are dynamic. Unlike standard CRUD applications that transition through highly predictable pathways, an AI agent takes actions based on LLM outputs, executes tools, retrieves memory, and continuously re-evaluates its progress. Throughout this execution loop, the agent needs to maintain a coherent record of what it has done, what it has discovered, and what steps remain.
 
@@ -70,3 +74,16 @@ Instead of mutating state in-place:
 1. **Unintentional Mutations**: Modifying nested lists (like `messages.append()`) directly. Always use copy-on-write.
 2. **State Bloat**: Storing raw images, PDF bytes, or long file contents directly in the state. Instead, store file paths or object storage references.
 3. **Out-of-Order Updates**: In multi-agent or asynchronous settings, delayed responses might overwrite newer state transitions. Always use version numbers or transaction tokens.
+
+---
+
+## Try It
+```sh
+cd part-1-foundations/01-state
+python -m pytest tests.py -q
+```
+What to watch for: the tests check that an update returns a *new* state and leaves the old one unchanged, that rolling back to version 1 is recorded as a new version (3) rather than erasing history, and that 50 threads making 500 updates end at exactly version 500.
+
+Experiment: in `StateStore.update`, replace `copy.deepcopy(kwargs["execution_plan"])` with `kwargs["execution_plan"]` and run the tests. `test_copy_on_write_leak_prevention` fails: the caller's later `plan.append(...)` now changes the stored state behind the store's back.
+
+**Next:** Lesson 02 puts this state in motion: a bounded think → act → observe loop with budgets, loop detection and a typed event log.
