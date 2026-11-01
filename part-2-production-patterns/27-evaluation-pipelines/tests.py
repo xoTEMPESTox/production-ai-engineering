@@ -109,7 +109,7 @@ class TestGate(unittest.TestCase):
 class TestOnlineSampling(unittest.TestCase):
     def test_sampling_is_deterministic_and_near_the_rate(self) -> None:
         picks = [should_sample(f"t-{i}", 0.05) for i in range(10_000)]
-        self.assertEqual(picks, [should_sample(f"t-{i}", 0.05) for i in range(10_000)])
+        self.assertTrue(picks == [should_sample(f"t-{i}", 0.05) for i in range(10_000)])  # no slow list diff
         self.assertTrue(400 < sum(picks) < 600)
 
     def test_flagged_traces_are_always_sampled(self) -> None:
