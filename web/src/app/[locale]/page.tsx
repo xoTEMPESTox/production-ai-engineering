@@ -55,7 +55,7 @@ const DEMO_LOOP = [
 const GLOWS = [
   { className: "-top-40 -left-32 h-[32rem] w-[32rem] bg-indigo-500/20", style: { "--dx": "60px", "--dy": "40px", "--drift-duration": "16s" } },
   { className: "-top-24 -right-32 h-[28rem] w-[28rem] bg-teal-500/15", style: { "--dx": "-50px", "--dy": "50px", "--drift-duration": "19s" } },
-  { className: "top-56 left-[35%] h-[24rem] w-[24rem] bg-rose-500/10", style: { "--dx": "40px", "--dy": "-40px", "--drift-duration": "22s" } },
+  { className: "top-56 left-[35%] h-[24rem] w-[24rem] bg-rose-500/5", style: { "--dx": "40px", "--dy": "-40px", "--drift-duration": "22s" } },
 ];
 
 function getVersionData(id: string) {
