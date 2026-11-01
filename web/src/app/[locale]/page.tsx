@@ -53,9 +53,9 @@ const DEMO_LOOP = [
 
 // Slow-drifting glows behind the hero, one per pillar colour (the .drift animation is in globals.css).
 const GLOWS = [
-  { className: "-top-24 left-[5%] h-72 w-72 bg-indigo-500/20", style: { "--dx": "40px", "--dy": "20px", "--drift-duration": "14s" } },
-  { className: "top-0 right-[5%] h-64 w-64 bg-teal-500/15", style: { "--dx": "-30px", "--dy": "30px", "--drift-duration": "17s" } },
-  { className: "top-48 left-[40%] h-56 w-56 bg-rose-500/10", style: { "--dx": "20px", "--dy": "-25px", "--drift-duration": "20s" } },
+  { className: "-top-40 -left-32 h-[32rem] w-[32rem] bg-indigo-500/20", style: { "--dx": "60px", "--dy": "40px", "--drift-duration": "16s" } },
+  { className: "-top-24 -right-32 h-[28rem] w-[28rem] bg-teal-500/15", style: { "--dx": "-50px", "--dy": "50px", "--drift-duration": "19s" } },
+  { className: "top-56 left-[35%] h-[24rem] w-[24rem] bg-rose-500/10", style: { "--dx": "40px", "--dy": "-40px", "--drift-duration": "22s" } },
 ];
 
 function getVersionData(id: string) {
@@ -94,8 +94,13 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-20 pb-16">
       {/* Hero: what this is, and what one lesson folder contains */}
-      <section className="relative isolate grid items-center gap-10 pt-8 sm:pt-16 lg:grid-cols-2">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <section className="isolate grid items-center gap-10 pt-8 sm:pt-16 lg:grid-cols-2">
+        {/* No positioned ancestor, so this layer spans the full page width from the very top
+            (behind the header) instead of the hero's box, and fades out instead of ending in an edge. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[46rem] overflow-hidden [mask-image:linear-gradient(to_bottom,black_55%,transparent)]"
+        >
           {GLOWS.map((glow, i) => (
             <div
               key={i}
