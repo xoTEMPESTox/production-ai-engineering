@@ -92,8 +92,10 @@ class TestGate(unittest.TestCase):
 
     def test_noise_sized_change_passes(self) -> None:
         base = scores_for({"billing question 1"})
-        cand = scores_for({"billing question 2"})  # one item swapped for another
-        self.assertTrue(gate(base, cand, DATA).passed)
+        cand = scores_for({"billing question 2", "account question 3"})  # one more miss out of 40
+        result = gate(base, cand, DATA)
+        self.assertLess(result.overall_delta, 0)  # a real but noise-sized drop
+        self.assertTrue(result.passed)
 
     def test_tiny_slice_is_reported_not_gated(self) -> None:
         data = Dataset("d", "1", tuple(DATA.examples) + (Example("vip-0", "vip question 0", "vip answer 0", "vip"),))
