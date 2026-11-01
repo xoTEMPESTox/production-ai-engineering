@@ -271,7 +271,7 @@ export const VERSION_META: Record<string, {
   p27: {
     title: "Evaluation Pipelines",
     subtitle: "Evaluation as a Release Gate",
-    coreAddition: "Cached Outputs & Paired CI Gate",
+    coreAddition: "Cached Outputs & Paired Regression Gate",
     keyInsight: "Same examples, same settings, honest confidence intervals, and a gate that checks every slice, not just the average.",
     layer: "patterns",
     prevVersion: "p26",

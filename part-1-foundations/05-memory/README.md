@@ -23,7 +23,7 @@ Both are solved outside the model, by the harness deciding what goes into the co
 ## What problem does it solve?
 1. **Finding the right chunk.** Users ask in their own words ("money back") while documents use others ("refunded"). Other queries hinge on one exact token, such as error code `E4012` or an order number, which embeddings blur.
 2. **Isolation.** In a multi-tenant product, one tenant's documents and one user's memories must never reach another's prompt.
-3. **Deciding what to keep.** Storing every message forever means storing PII, contradictions and junk.
+3. **Deciding what to keep.** Storing every message forever means storing PII (personally identifiable information, such as emails and phone numbers), contradictions and junk.
 4. **Fitting in the window.** Long sessions with big tool outputs exceed the budget, and naive truncation drops the system prompt or the task itself.
 
 ---
@@ -72,7 +72,7 @@ Filtering comes first, so ranking never sees another tenant's data and a small t
 
 **4. Hybrid retrieval, fused by rank.** BM25 rewards exact and rare terms; vectors reward shared meaning. Reciprocal Rank Fusion combines their *ranks*, so the two incomparable scores never need calibrating. The demo prints both ranks for each hit: "How long is the refund window?" is found only by vectors (`bm25#=None vec#=1`), and "What does E4012 mean?" only by BM25 (`bm25#=1 vec#=None`).
 
-**5. User memories go through a write policy.** PII is redacted before storage (`ana@example.com` becomes `[EMAIL]`), whitespace is normalised and exact duplicates are dropped, and every memory has a TTL. `purge_expired()` physically deletes expired records, and `forget(tenant, user)` handles a deletion request. Memory IDs come from a counter that is never reused, so a deletion can't make a new memory overwrite an old one.
+**5. User memories go through a write policy.** PII is redacted before storage (`ana@example.com` becomes `[EMAIL]`), whitespace is normalised and exact duplicates are dropped, and every memory has a TTL (time to live: an expiry date). `purge_expired()` physically deletes expired records, and `forget(tenant, user)` handles a deletion request. Memory IDs come from a counter that is never reused, so a deletion can't make a new memory overwrite an old one.
 
 **6. Compact the conversation, cheapest step first.** The system prompt and the last few turns are never touched. Old tool outputs are replaced with a short stub (only when the stub is shorter), which costs no model call, and the tool can be re-run. Only if that isn't enough are the old turns summarised, which costs one call. If the context is still over budget, `compact` raises instead of silently sending a request the provider will reject.
 

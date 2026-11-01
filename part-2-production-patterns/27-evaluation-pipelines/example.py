@@ -5,7 +5,7 @@ An offline eval harness that can gate a release. Datasets and run configs
 are versioned; model outputs are cached under a key built from everything
 that affects them, so re-running is free and a new metric re-scores without
 re-generating; failed calls are never cached. Results are reported per
-slice with bootstrap confidence intervals, and the CI gate compares a
+slice with bootstrap confidence intervals, and the regression gate compares a
 candidate with the baseline on the same examples: it fails on a drop larger
 than the noise, or on a slice that broke while the average looked fine.
 Production traffic is sampled into the review queue deterministically.
@@ -150,7 +150,7 @@ def gate(baseline: dict[str, float], candidate: dict[str, float], dataset: Datas
     low, high = bootstrap_ci(deltas)
     reasons, notes = [], []
     if high < 0:
-        reasons.append(f"overall drop {sum(deltas) / len(deltas):+.3f} is beyond the noise (95% CI {low}, {high})")
+        reasons.append(f"overall drop {sum(deltas) / len(deltas):+.3f} is beyond the noise (95% interval {low}, {high})")
     for name in sorted({ex.slice for ex in dataset.examples}):
         members = [ex.id for ex in dataset.examples if ex.slice == name]
         drop = sum(baseline[i] - candidate[i] for i in members) / len(members)
@@ -213,13 +213,13 @@ if __name__ == "__main__":
         mean = sum(scores.values()) / len(scores)
         by_slice = {s: round(sum(scores[e.id] for e in data.examples if e.slice == s) /
                              sum(e.slice == s for e in data.examples), 2) for s in ("billing", "account", "shipping")}
-        print(f"{name:<9} exact_match {mean:.3f} CI {bootstrap_ci(list(scores.values()))}  {by_slice}")
+        print(f"{name:<9} exact_match {mean:.3f} 95% interval {bootstrap_ci(list(scores.values()))}  {by_slice}")
 
     result = gate(base, cand, data)
-    print(f"\ngate passed={result.passed}  overall delta {result.overall_delta:+.3f} CI {result.delta_ci}")
+    print(f"\ngate passed={result.passed}  overall delta {result.overall_delta:+.3f} 95% interval {result.delta_ci}")
     for reason in result.reasons:
         print("  FAIL:", reason)
-    print("  (in CI: raise SystemExit(0 if result.passed else 1))")
+    print("  (in continuous integration: raise SystemExit(0 if result.passed else 1))")
 
     sampled = sum(should_sample(f"trace-{i}", rate=0.05) for i in range(10_000))
     print(f"\nonline sampling at 5%: {sampled} of 10,000 traces; flagged traces always included")

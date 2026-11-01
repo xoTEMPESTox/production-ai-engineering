@@ -13,9 +13,9 @@ flowchart LR
     GenC <--> Cache
     GenB --> Score[score: exact_match per example]
     GenC --> Score
-    Score --> Report[per-slice means + bootstrap CIs]
+    Score --> Report[per-slice means + bootstrap confidence intervals]
     Score --> Gate{paired gate}
-    Gate -- delta CI below 0, or a slice dropped more than 0.10 --> Fail[exit 1: block merge]
+    Gate -- delta interval below 0, or a slice dropped more than 0.10 --> Fail[exit 1: block merge]
     Gate -- otherwise --> Pass[exit 0]
     Prod[(production traces)] --> Sample[should_sample: hash bucket or flagged]
     Sample --> Review[human review + labels] --> Load
@@ -74,7 +74,7 @@ sequenceDiagram
 
 | | `evaluate(new) >= evaluate(old)` | Paired gate (this lesson) |
 |---|---|---|
-| Overall | 0.875 ≥ 0.850, so ship | delta +0.025, CI (-0.1, 0.15): no significant change either way |
+| Overall | 0.875 ≥ 0.850, so ship | delta +0.025, 95% interval (-0.1, 0.15): no significant change either way |
 | Shipping slice | not looked at | 0.92 → 0.67 with n=12: **fail** |
 | Cost of the comparison | 80 generations every time | 40 for the new prompt; baseline from the cache |
 | A timeout during the run | crash, or a cached empty answer | one error recorded and retried next run |

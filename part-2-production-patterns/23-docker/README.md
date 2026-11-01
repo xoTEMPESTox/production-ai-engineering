@@ -1,6 +1,6 @@
 # Lesson 23: Docker
 
-Learn how to package an AI service so it starts the same way everywhere: multi-stage builds, a non-root user, health checks that separate "alive" from "ready", artifacts like retrieval indexes baked in or mounted with a checksum, and a policy check that catches bad Dockerfiles in CI.
+Learn how to package an AI service so it starts the same way everywhere: multi-stage builds, a non-root user, health checks that separate "alive" from "ready", artifacts like retrieval indexes baked in or mounted with a checksum, and a policy check that catches bad Dockerfiles in continuous integration (CI).
 
 > **Pillars:** Harness · RAG  |  **Harness layer:** packaging, meaning what exactly runs in production and how the platform knows it's healthy
 >

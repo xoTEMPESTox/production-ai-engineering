@@ -75,7 +75,7 @@ store.complete(lease)
 ## Design Tradeoffs
 
 ### Short vs. long leases
-* **Short** (seconds): a dead worker's job is picked up quickly. Heartbeats are frequent, and a slow step or a GC pause can lose the lease mid-work.
+* **Short** (seconds): a dead worker's job is picked up quickly. Heartbeats are frequent, and a slow step or a garbage-collection pause can lose the lease mid-work.
 * **Long** (minutes): fewer heartbeats and fewer false takeovers. When a worker dies, the job waits out the whole lease.
 * Rule of thumb: the lease should be several times the longest gap between heartbeats.
 

@@ -9,7 +9,7 @@ Learn how to measure an AI system per component: deterministic scorers first, an
 ## Why does this exist?
 Every lesson so far has changed behaviour: prompts, retrieval, tools, plans. Without measurement you can't tell whether a change helped. "Looks good on five examples" is how a regression reaches users on the sixth.
 
-Evaluation turns quality into numbers you can compare, broken down by component: did retrieval find the evidence, did the answer use it, is anything missing? This lesson builds the scorers and the judgement about which ones to trust. Lesson 27 turns them into a pipeline with versioned datasets, confidence intervals and a CI gate.
+Evaluation turns quality into numbers you can compare, broken down by component: did retrieval find the evidence, did the answer use it, is anything missing? This lesson builds the scorers and the judgement about which ones to trust. Lesson 27 turns them into a pipeline with versioned datasets, confidence intervals and a regression gate that runs in continuous integration (CI).
 
 ---
 

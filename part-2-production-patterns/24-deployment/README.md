@@ -60,7 +60,7 @@ Each stage is compared with the stable release over the *same period*, so time-o
 
 **5. Instant rollback.** The stable release never stops running during a canary, so rolling back just sets `candidate_percent` to 0. In the demo, the same bad candidate with shadow skipped is rolled back automatically **at 1%**: about one user in a hundred saw it, for minutes.
 
-**6. Warm instances before they take traffic.** `p95_with_cold_starts` shows what a 6-second model or index load does to p95 when new instances serve their first requests cold (6,800 ms), versus when they're warmed first (800 ms). Mitigations: send warm-up requests before marking an instance ready (Lesson 23's `/readyz`), keep a minimum number of warm instances (serverless platforms offer settings such as provisioned concurrency or minimum instances), keep images and artifacts small, and load lazily only what isn't needed for the first request.
+**6. Warm instances before they take traffic.** `p95_with_cold_starts` shows what a 6-second model or index load does to p95 latency (the time 95% of requests finish within) when new instances serve their first requests cold (6,800 ms), versus when they're warmed first (800 ms). Mitigations: send warm-up requests before marking an instance ready (Lesson 23's `/readyz`), keep a minimum number of warm instances (serverless platforms offer settings such as provisioned concurrency or minimum instances), keep images and artifacts small, and load lazily only what isn't needed for the first request.
 
 ---
 

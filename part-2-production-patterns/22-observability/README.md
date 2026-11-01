@@ -34,7 +34,7 @@ def answer(question, user_email):
 ```
 
 ### Why does that fail?
-1. **The log lines are unstructured.** You can't compute p95 latency per step or tokens per model from them.
+1. **The log lines are unstructured.** You can't compute p95 latency (the time 95% of requests finish within) per step or tokens per model from them.
 2. **There's no trace or parent ID.** Concurrent runs interleave, and nobody can tell which line belongs to which run.
 3. **Personal data and whole documents land in the logs.** Emails, phone numbers and full documents are visible to everyone with log access, and kept for months.
 4. **No tokens and no cost are recorded.** The bill arrives as a monthly surprise.

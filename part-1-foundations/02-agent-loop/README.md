@@ -11,7 +11,7 @@ A single LLM call can only answer from what is already in its prompt. Agents wor
 
 Coding agents, research agents and support bots that look up your order all run a version of this loop. The loop itself is about twenty lines. What makes it safe to run unattended is the **harness** around it: budgets, stop conditions, error handling and a record of every step. That is what this lesson builds.
 
-Retrieval fits here too. When search is a tool, the model decides whether to search, what to search for and whether to search again. This is **agentic RAG**, as opposed to a fixed retrieve-then-generate pipeline. Lesson 05 builds the retrieval itself; this lesson builds the loop that calls it.
+Retrieval fits here too. When search is a tool, the model decides whether to search, what to search for and whether to search again. This is **agentic RAG** (retrieval-augmented generation: the model answers from documents it retrieved), as opposed to a fixed retrieve-then-generate pipeline. Lesson 05 builds the retrieval itself; this lesson builds the loop that calls it.
 
 ---
 

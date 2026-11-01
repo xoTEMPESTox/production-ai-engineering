@@ -57,15 +57,18 @@ def worker():
 
 **3. Failures retry through the queue, then dead-letter.** A failed job is left unacknowledged with its error recorded, and it reappears after the timeout. On receive, a message that has already been delivered `max_receives` times moves to `dead_letters` with its last error instead of being handed out again. In the demo the corrupt PDF is parked after three attempts, while the healthy documents carry on.
 
-**4. Single-flight per record:**
+**4. Single-flight per record**, meaning at most one run in flight per document:
 ```python
 def handle(self, message):
     doc_id = message.body["doc_id"]
     if not self.flight.try_start(doc_id):  # a run for this document is already going
         self.queue.ack(message.id)         # absorb the duplicate...
         return "coalesced"                 # ...the running job will re-run once
+    succeeded = False
     try:
-        self.process(doc_id); self.queue.ack(message.id); succeeded = True
+        self.process(doc_id)
+        self.queue.ack(message.id)
+        succeeded = True
     finally:
         if self.flight.finish(doc_id, succeeded):  # duplicates arrived during the run
             self.queue.send({"doc_id": doc_id, "reason": "changed while processing"})
@@ -87,7 +90,9 @@ A duplicate arriving while a run is in progress doesn't start a second run. It m
 ### Coalescing vs. processing every event vs. waiting on the running job
 * **Every event**: simple, with every version processed in order, but N times the cost and racing writes.
 * **Coalesce plus one follow-up** (this lesson): at most two runs per burst, always ending on the latest version. Intermediate versions are never processed. That's right for re-indexing, and wrong when every event must be acted on (each payment, each message).
-* **Waiters subscribe to the running job**: callers that need the result wait for the run already in flight (the "single-flight" pattern found in several standard libraries). Needs a way to deliver the result to every waiter.
+* **Waiters subscribe to the running job**: callers that need the result wait for the run already in flight and share it. This is how Go's `golang.org/x/sync/singleflight` package works, and what Lesson 30's cache does with concurrent misses. Needs a way to deliver the result to every waiter.
+
+Both of the last two keep one run in flight per key, which is why both get called single-flight. They differ in what happens to the duplicate: here it is absorbed and triggers one follow-up run; there it waits and gets the same result.
 
 ### Automatic redrive vs. manual inspection of the dead-letter queue
 * **Automatic redrive** (move dead letters back after a fix or a cool-down): recovers from temporary causes without a person, but redriving a real poison message just fails again.

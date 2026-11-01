@@ -67,7 +67,7 @@ Why each step sits where it does:
 
 **Where MCP fits.** The Model Context Protocol standardises how tools are described and called across process boundaries. An MCP server lists its tools (each with a name, a description and a JSON Schema for its input) and executes calls; a client inside your agent connects to it over stdio or HTTP using JSON-RPC. That removes the custom glue for each integration. It doesn't replace this pipeline: a tool from an MCP server is registered like any other, and your harness still validates its arguments, assigns its tier, enforces its timeout and truncates its results. Servers can annotate tools with hints such as read-only or destructive, but those are claims made by the server. The tier is your decision.
 
-**Hooks.** Because every call passes through one function, that function is the natural place for pre- and post-execution hooks: audit logging, redacting PII from results, metrics per tool and outcome. Add behaviour around the pipeline, not inside each tool.
+**Hooks.** Because every call passes through one function, that function is the natural place for pre- and post-execution hooks: audit logging, redacting PII (personal data such as emails and phone numbers) from results, metrics per tool and outcome. Add behaviour around the pipeline, not inside each tool.
 
 ---
 

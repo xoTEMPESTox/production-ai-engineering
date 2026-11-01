@@ -60,7 +60,7 @@ As soon as any untrusted content enters the context, write-tier tools need a per
 
 **3. Detect injection phrases, as a signal only.** `injection_signals` flags known phrasings for logging and review (flag the trace, Lesson 22). A test shows a paraphrase sailing past it, which is why it never gates anything on its own.
 
-**4. Never execute model output.** `safe_calculate` parses the expression and walks a whitelisted AST: numbers, `+ - * / %` and unary minus. Names, calls, attributes and comprehensions are rejected, and so is exponentiation, because `9 ** 9 ** 9` would eat the CPU. There is no `eval` anywhere. When an agent genuinely must run code (a coding agent), it runs in a sandbox: a container or VM with no network, no secrets and limited resources.
+**4. Never execute model output.** `safe_calculate` parses the expression and walks a whitelisted AST (abstract syntax tree, the parsed structure of the expression): numbers, `+ - * / %` and unary minus. Names, calls, attributes and comprehensions are rejected, and so is exponentiation, because `9 ** 9 ** 9` would eat the CPU. There is no `eval` anywhere. When an agent genuinely must run code (a coding agent), it runs in a sandbox: a container or VM with no network, no secrets and limited resources.
 
 **5. Tokenise personal data, then restore it.** A `PiiVault` per request replaces emails, card numbers and phone numbers with `[EMAIL_1]`-style tokens before anything reaches the model, and restores them in the reply. The same value always gets the same token within a request, and tokens from one request don't decode in another. Regex patterns catch structured PII only. Names and addresses need entity detection.
 

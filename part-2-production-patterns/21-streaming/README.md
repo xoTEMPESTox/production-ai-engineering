@@ -70,7 +70,7 @@ async with aclosing(llm.stream(question)) as chunks:  # closes upstream as soon 
         ...
         yield sse("delta", {"text": delta})
 ```
-When the client disconnects, the server cancels or closes our generator. Without `aclosing`, the *upstream* generator is only closed later, when the event loop finalises it, and until then the model call stays open. The bug is easy to miss, because the client sees nothing wrong: the model just keeps generating, and billing, after the client has left. With `aclosing` it stops immediately. A test drives the FastAPI endpoint with a raw ASGI `http.disconnect` after three frames and confirms the model stopped early.
+When the client disconnects, the server cancels or closes our generator. Without `aclosing`, the *upstream* generator is only closed later, when the event loop finalises it, and until then the model call stays open. The bug is easy to miss, because the client sees nothing wrong: the model just keeps generating, and billing, after the client has left. With `aclosing` it stops immediately. A test drives the FastAPI endpoint with a raw ASGI (the interface between Python web servers and apps) `http.disconnect` after three frames and confirms the model stopped early.
 
 ---
 

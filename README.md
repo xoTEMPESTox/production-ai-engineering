@@ -116,7 +116,7 @@ Goal: Learn how to scale, secure, monitor, and configure agents in a production 
 | 24 | [Deployment](part-2-production-patterns/24-deployment) | Eval gate, shadow traffic, sticky canary, guardrail rollback, warm starts | ✅ Completed |
 | 25 | [Configuration](part-2-production-patterns/25-configuration) | Typed fail-fast settings, SecretStr secrets, audited prompt/model flags | ✅ Completed |
 | 26 | [Monitoring](part-2-production-patterns/26-monitoring) | SLO burn-rate alerts, AI quality signals, alert dedupe, PSI drift | ✅ Completed |
-| 27 | [Evaluation Pipelines](part-2-production-patterns/27-evaluation-pipelines) | Cached outputs, bootstrap CIs, paired per-slice CI gate, online sampling | ✅ Completed |
+| 27 | [Evaluation Pipelines](part-2-production-patterns/27-evaluation-pipelines) | Cached outputs, bootstrap confidence intervals, paired per-slice regression gate, online sampling | ✅ Completed |
 | 28 | [Cost Tracking](part-2-production-patterns/28-cost-tracking) | Per-call ledger, reserve-then-settle budgets, cache, cascades, batch | ✅ Completed |
 | 29 | [Security](part-2-production-patterns/29-security) | Indirect prompt injection, taint-aware least privilege, no eval, PII vault | ✅ Completed |
 | 30 | [Scaling](part-2-production-patterns/30-scaling) | Rate-aware gateway with spill-over, AIMD, micro-batching, single-flight cache | ✅ Completed |

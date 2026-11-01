@@ -11,7 +11,7 @@ In Lesson 02 the final answer was a string that went straight to the user. That 
 
 Two artifacts are involved: the **prompt** that asks for a shape, and the **output** that may or may not have it. Both change over time, because prompts get edited and models get upgraded, so both need to be identifiable and checkable.
 
-The RAG version of this problem is the most common one: "answer from these sources and cite them". A model can return perfect JSON that cites a source it was never given. The schema can't catch that, but a check against the sources this request actually sent can.
+The RAG (retrieval-augmented generation) version of this problem is the most common one: "answer from these sources and cite them". A model can return perfect JSON that cites a source it was never given. The schema can't catch that, but a check against the sources this request actually sent can.
 
 ---
 

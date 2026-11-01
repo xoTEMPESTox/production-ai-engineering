@@ -116,4 +116,4 @@ What to watch for: the `user_id` label is refused. During the hour-30 outage, th
 
 Experiment: in `evaluate_rules`, drop the short-window condition (`and short_rate > threshold`) and run the tests. `test_alert_clears_soon_after_recovery` fails: ten minutes after the provider recovered, the page is still firing, because the one-hour window remembers the outage.
 
-**Next:** Lesson 27 turns evaluation into a release gate: versioned datasets, cached outputs, confidence intervals, and a regression check in CI.
+**Next:** Lesson 27 turns evaluation into a release gate: versioned datasets, cached outputs, confidence intervals, and a regression check in continuous integration (CI).

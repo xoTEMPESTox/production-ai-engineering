@@ -1,6 +1,6 @@
 # Lesson 27: Evaluation Pipelines
 
-Learn how to turn evaluation into a release gate: versioned datasets and configs, cached outputs, per-slice results with confidence intervals, a paired regression check in CI, and production traffic sampled back into the dataset.
+Learn how to turn evaluation into a release gate: versioned datasets and configs, cached outputs, per-slice results with confidence intervals, a paired regression check in continuous integration (CI), and production traffic sampled back into the dataset.
 
 > **Pillars:** Harness · RAG · Agent  |  **Harness layer:** the release gate, meaning how a prompt, model or retrieval change earns its way to production
 >
@@ -67,7 +67,7 @@ Change any part and the key changes, so a cached output is never served for a di
 ```
 baseline  exact_match 0.850  {'billing': 0.88, 'account': 0.75, 'shipping': 0.92}
 candidate exact_match 0.875  {'billing': 0.94, 'account': 1.0,  'shipping': 0.67}
-gate passed=False  overall delta +0.025 CI (-0.1, 0.15)
+gate passed=False  overall delta +0.025 95% interval (-0.1, 0.15)
   FAIL: slice 'shipping' dropped 0.25 (n=12)
 ```
 
