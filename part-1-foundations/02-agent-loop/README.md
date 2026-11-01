@@ -2,6 +2,10 @@
 
 Learn how a model becomes an agent: a bounded think → act → observe loop in which the model proposes and the harness decides.
 
+> **Pillars:** Agent · Harness (with agentic RAG)  |  **Harness layer:** the loop that runs the model
+>
+> *The model proposes the next action. The harness decides whether it runs.*
+
 ## Why does this exist?
 A single LLM call can only answer from what is already in its prompt. Agents work on tasks where the information isn't there yet: they have to look something up, act, see what happened and decide what to do next. The mechanism is a loop. The model reads the conversation so far and proposes one action (call a tool, or give the final answer); the harness runs the tool and appends the result as an **observation**; repeat.
 
@@ -44,7 +48,26 @@ def run_agent(task):
 ---
 
 ## How is this solved in production?
-The loop stays simple, and the harness wraps every step:
+The loop stays simple, and the harness wraps every step. The core of `AgentLoop.run()` in `example.py`, in the order the checks happen:
+```python
+for step in range(1, budget.max_steps + 1):
+    if clock() - started > budget.max_seconds:           # time: checked before each call
+        return stop(step - 1, StopReason.TIME_BUDGET)
+    turn = llm.complete(messages, tool_names)            # the model proposes
+    tokens += turn.input_tokens + turn.output_tokens
+    if turn.final_answer is not None:                    # done
+        return stop(step, StopReason.FINAL_ANSWER, turn.final_answer)
+    if tokens > budget.max_tokens:                       # cost: checked after each call
+        return stop(step, StopReason.TOKEN_BUDGET)
+    if call_counts[fingerprint] >= budget.max_identical_calls:
+        return stop(step, StopReason.LOOP_DETECTED)      # stuck: never runs a third time
+    observation = execute(turn.tool_call)                # errors come back as text
+    messages += [call, observation]                      # observe, then loop
+return stop(budget.max_steps, StopReason.MAX_STEPS)
+```
+(Shortened: the real method also handles model exceptions and replies with neither a tool call nor an answer, and records an event at every branch.)
+
+What each piece is for:
 1. **Budgets checked by the harness on every step**: maximum steps, maximum tokens (summed from the usage the provider reports) and maximum wall-clock seconds. Stopping is decided from numbers, not by asking the model nicely.
 2. **The stop reason is data.** Every run ends with exactly one `StopReason`: `final_answer`, `max_steps`, `token_budget`, `time_budget`, `loop_detected` or `model_error`. Callers branch on it and dashboards count it. "What share of runs end on a budget?" is one of the first production metrics worth having.
 3. **Tool errors become observations.** The exception is caught, formatted as `ERROR: KeyError: 'unknown account acct-71'` and given back to the model, which usually fixes its own mistake on the next step. An unknown tool name gets the list of tools that do exist.
@@ -82,3 +105,17 @@ What this loop deliberately leaves out for now: per-call timeouts (a hanging too
 5. **Budget overshoot within a step**: tokens are counted after each call, so a run can exceed `max_tokens` by up to one turn. Size the budget with that in mind, or estimate before calling.
 6. **Wall-clock budgets don't interrupt a hanging call.** The check runs between steps, so a tool that never returns needs its own timeout (Lesson 04).
 7. **Logging only the final answer**: without the event log, a wrong answer can't be traced back to the step that caused it.
+
+---
+
+## Try It
+```sh
+cd part-1-foundations/02-agent-loop
+python example.py            # two scripted runs; no API key needed
+python -m pytest tests.py -q
+```
+What to watch for: in the first run, step 1's `KeyError` shows up as a `tool_error` event and the model fixes the ID on step 2. The run keeps going instead of crashing. In the second run, the model proposes the same search three times, but the tool only runs twice before `loop_detected` ends the run.
+
+Experiment: pass `Budget(max_steps=3)` to the first `AgentLoop` and run it again. The run ends with `max_steps` one step before the answer, which is what a budget set too tight looks like on a dashboard.
+
+**Next:** Lesson 03 makes the final answer machine-checkable: a schema, citations validated against the sources, one repair attempt, and fail closed.
