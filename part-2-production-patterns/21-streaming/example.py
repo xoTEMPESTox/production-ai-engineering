@@ -57,25 +57,38 @@ def sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
 
+JSON_ESCAPES = {'"': '"', "\\": "\\", "/": "/", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t"}
+
+
 def _decode_prefix(raw: str) -> tuple[str, bool]:
     """Decode a JSON string body that may be cut off mid-way. Returns (text, closed)."""
-    out, i = [], 0
+    out: list[str] = []
+    i = 0
     while i < len(raw):
         c = raw[i]
         if c == '"':
             return "".join(out), True
-        if c == "\\":
-            if i + 1 >= len(raw) or (raw[i + 1] == "u" and i + 6 > len(raw)):
-                break  # an escape split across chunks: wait for the rest
-            if raw[i + 1] == "u":
-                out.append(chr(int(raw[i + 2:i + 6], 16)))
-                i += 6
-                continue
-            out.append({"n": "\n", "t": "\t"}.get(raw[i + 1], raw[i + 1]))
+        if c != "\\":
+            out.append(c)
+            i += 1
+            continue
+        if i + 1 >= len(raw):
+            break  # an escape split across chunks: wait for the rest
+        if raw[i + 1] != "u":
+            out.append(JSON_ESCAPES.get(raw[i + 1], raw[i + 1]))  # an invalid escape fails final validation
             i += 2
             continue
-        out.append(c)
-        i += 1
+        if i + 6 > len(raw):
+            break
+        code = int(raw[i + 2:i + 6], 16)
+        if 0xD800 <= code < 0xDC00:  # an emoji arrives as two \u escapes (a surrogate pair)
+            if i + 12 > len(raw):
+                break
+            low = int(raw[i + 8:i + 12], 16)
+            code = 0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00)
+            i += 6
+        out.append(chr(code))
+        i += 6
     return "".join(out), False
 
 

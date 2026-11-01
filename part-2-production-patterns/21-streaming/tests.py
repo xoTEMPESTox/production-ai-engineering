@@ -49,6 +49,13 @@ class TestExtractor(unittest.TestCase):
         unicode = AnswerExtractor()
         self.assertEqual("".join(unicode.feed(c) for c in ['{"answer": "caf\\u0', '0e9"}']), "café")
 
+    def test_every_json_escape_decodes_at_every_split_point(self) -> None:
+        answer = 'tab\t cr\r bs\b ff\f quote" slash\\ /path emoji\U0001F600 accenté'
+        raw = json.dumps({"answer": answer})  # ensure_ascii: the emoji becomes a 😀 pair
+        for cut in range(len(raw)):
+            extractor = AnswerExtractor()
+            self.assertEqual(extractor.feed(raw[:cut]) + extractor.feed(raw[cut:]), answer, msg=f"cut at {cut}")
+
     def test_streamed_text_equals_the_final_answer(self) -> None:
         events = asyncio.run(collect(FakeStreamingLLM(REPLY, chunk_chars=5)))
         streamed = "".join(d["text"] for e, d in events if e == "delta")

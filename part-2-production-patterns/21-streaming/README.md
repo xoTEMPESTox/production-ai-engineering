@@ -57,7 +57,7 @@ event: error   data: {"message": "...", "retract": true}         instead of done
 ```
 Each frame is `event:` plus one `data:` line of JSON plus a blank line. `json.dumps` keeps the data on one line, because raw text containing newlines would need one `data:` line per line. The endpoint sets `Cache-Control: no-cache` and `X-Accel-Buffering: no` (an nginx convention) so proxies pass frames through as they're produced. Long silences can be bridged with `:` comment lines as keep-alives.
 
-**2. Extract the answer while the JSON streams.** `AnswerExtractor` finds `"answer": "` in the growing buffer and decodes the string value incrementally, so only new characters go out as `delta` events. It handles escapes split across chunks (`\` in one chunk and `n` in the next, or `\u00` then `e9`), and it never emits the JSON punctuation. The streamed text is exactly the final `answer` field, and a test checks that.
+**2. Extract the answer while the JSON streams.** `AnswerExtractor` finds `"answer": "` in the growing buffer and decodes the string value incrementally, so only new characters go out as `delta` events. It decodes every JSON escape, including ones split across chunks (`\` in one chunk and `n` in the next, `\u00` then `e9`, or the two `\u` halves of an emoji), and it never emits the JSON punctuation. The streamed text is exactly the final `answer` field, and a test checks that with the stream cut at every possible point.
 
 **3. Validate at the end, and retract if needed.** When the stream finishes, the whole reply is validated as `Answer` (Lesson 03's contract). If it fails, for example because it was truncated, the last frame is `error` with `retract: true`, and the client replaces the text it showed with a failure message instead of leaving an unverified answer on screen. An upstream error mid-stream is also turned into an `error` frame, never a silently dropped connection.
 
@@ -70,7 +70,7 @@ async with aclosing(llm.stream(question)) as chunks:  # closes upstream as soon 
         ...
         yield sse("delta", {"text": delta})
 ```
-When the client disconnects, the server cancels or closes our generator. Without `aclosing`, the *upstream* generator is only closed later, when the event loop finalises it, and until then the model call stays open. This lesson's first draft had exactly that bug: the demo showed the model still running after the client left. With `aclosing` it stops immediately. A test drives the FastAPI endpoint with a raw ASGI `http.disconnect` after three frames and confirms the model stopped early.
+When the client disconnects, the server cancels or closes our generator. Without `aclosing`, the *upstream* generator is only closed later, when the event loop finalises it, and until then the model call stays open. The bug is easy to miss, because the client sees nothing wrong: the model just keeps generating, and billing, after the client has left. With `aclosing` it stops immediately. A test drives the FastAPI endpoint with a raw ASGI `http.disconnect` after three frames and confirms the model stopped early.
 
 ---
 

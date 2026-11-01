@@ -101,7 +101,7 @@ The fake client's latencies use real `asyncio.sleep`, so the demo and the tests 
 1. **Unbounded `gather`** over a user-sized list.
 2. **Missing timeouts** on network calls.
 3. **Lost exceptions**: a fire-and-forget `create_task` whose result nobody awaits, so its error is never seen (and an unreferenced task can be garbage-collected mid-run).
-4. **Orphaned tasks**: the caller is cancelled but the calls it started keep running and spending. The first draft of this lesson had exactly this bug, found because a test ran longer than it should have.
+4. **Orphaned tasks**: the caller is cancelled but the calls it started keep running and spending. Often the first sign is a test that takes longer than it should.
 5. **Swallowed cancellation**: `except BaseException` or a bare `except:` around an `await`.
 6. **Blocking the event loop**: `time.sleep`, synchronous HTTP clients, synchronous SDK calls or large parses inside `async def`.
 7. **Unbounded queues** between a fast producer and slow consumers.
