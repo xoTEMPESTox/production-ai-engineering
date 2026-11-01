@@ -4,6 +4,8 @@ Learn how to represent, update, and manage agent state in production AI systems.
 
 > **Pillars:** Harness · Agent  |  **Harness layer:** state, meaning the record of what the agent has done and what it knows
 >
+> The **harness** is all the code around the model call that makes an agent safe to run: the loop, tools, state, limits, retries and logs. Each lesson tags the pillars it teaches (Agent, RAG or retrieval-augmented generation, and Harness) and the harness layer it builds.
+>
 > *Never change state in place: every update is a new version you can audit and roll back.*
 
 ## Why does this exist?
@@ -55,6 +57,7 @@ Instead of mutating state in-place:
 2. Updates are made by producing a *new copy* of the state (using deep copies or state delta transitions).
 3. Every state transition is recorded as a new version or step, creating an immutable ledger of the agent's run history.
 4. Thread-safe locks or database transaction boundaries are used to coordinate concurrent runs.
+5. The store never hands out its own objects. A frozen dataclass stops `state.execution_plan = [...]` but not `state.execution_plan.append(...)`, so `StateStore` returns deep copies. The stricter alternative is tuples and read-only mappings, so a mutation raises an error instead of being silently ignored.
 
 ---
 
@@ -80,9 +83,10 @@ Instead of mutating state in-place:
 ## Try It
 ```sh
 cd part-1-foundations/01-state
+python example.py
 python -m pytest tests.py -q
 ```
-What to watch for: the tests check that an update returns a *new* state and leaves the old one unchanged, that rolling back to version 1 is recorded as a new version (3) rather than erasing history, and that 50 threads making 500 updates end at exactly version 500.
+What to watch for: the demo prints four versions, and v3 (the rollback) has the same plan as v1 while v2 stays in the history. The tests check that an update returns a *new* state and leaves the old one unchanged, that changing a state the store handed out (`store.get_state().execution_plan.append(...)`) can't rewrite history, that rolling back to version 1 is recorded as a new version (3) rather than erasing history, and that 50 threads making 500 updates end at exactly version 500.
 
 Experiment: in `StateStore.update`, replace `copy.deepcopy(kwargs["execution_plan"])` with `kwargs["execution_plan"]` and run the tests. `test_copy_on_write_leak_prevention` fails: the caller's later `plan.append(...)` now changes the stored state behind the store's back.
 

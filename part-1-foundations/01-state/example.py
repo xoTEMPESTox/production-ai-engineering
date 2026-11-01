@@ -35,7 +35,9 @@ class StateStore:
     def get_state(self) -> AgentState:
         """Retrieves the current immutable snapshot of the agent state."""
         with self._lock:
-            return self._current_state
+            # frozen=True only stops field reassignment; the lists inside can still
+            # be mutated, so callers get a copy and never the stored object.
+            return copy.deepcopy(self._current_state)
 
     def update(self, **kwargs: Any) -> AgentState:
         """
@@ -83,7 +85,7 @@ class StateStore:
             # Update pointer and append to history log for audit and rollback capabilities
             self._current_state = new_state
             self._history.append(new_state)
-            return new_state
+            return copy.deepcopy(new_state)
 
     def rollback(self, target_version: int) -> AgentState:
         """
@@ -116,9 +118,22 @@ class StateStore:
 
             self._current_state = new_state
             self._history.append(new_state)
-            return new_state
+            return copy.deepcopy(new_state)
 
     def get_history(self) -> List[AgentState]:
         """Returns a snapshot copy of the full transaction log history."""
         with self._lock:
-            return list(self._history)
+            return copy.deepcopy(self._history)
+
+
+if __name__ == "__main__":
+    store = StateStore()
+    store.update(current_task="Answer a refund question", execution_plan=["look up plan", "search policy"])
+    store.update(execution_plan=["look up plan", "search policy", "reply"], metadata={"tokens": 1200})
+
+    # A caller mutates the snapshot it was given; the stored versions are unaffected.
+    store.get_state().execution_plan.append("INJECTED")
+
+    store.rollback(1)  # recorded as a new version, not by erasing v2
+    for state in store.get_history():
+        print(f"v{state.version}: task={state.current_task!r} plan={state.execution_plan} meta={state.metadata}")

@@ -50,6 +50,19 @@ class TestAgentState(unittest.TestCase):
         self.assertEqual(state.execution_plan, ["step1"])
         self.assertEqual(state.metadata, {"user": "bob"})
 
+    def test_returned_states_cannot_rewrite_history(self) -> None:
+        store = StateStore()
+        store.update(execution_plan=["step1"])
+
+        # Mutate every object the store hands out
+        store.get_state().execution_plan.append("INJECTED")
+        store.update(current_task="next").execution_plan.append("INJECTED")
+        store.get_history()[1].execution_plan.append("INJECTED")
+
+        history = store.get_history()
+        self.assertEqual(history[1].execution_plan, ["step1"])
+        self.assertEqual(history[2].execution_plan, ["step1"])
+
     def test_rollback(self) -> None:
         store = StateStore()
         store.update(current_task="Task A")
