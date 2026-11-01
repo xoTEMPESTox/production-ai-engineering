@@ -107,6 +107,6 @@ python -m pytest tests.py -q
 ```
 What to watch for: in the burst, provider A serves about 700, provider B about 320, and 179 are rejected explicitly. The AIMD trajectory climbs toward 20 and halves on throttling. 100 embedding requests make 4 calls. 51 requests for the same answer, across two replicas, make one model call.
 
-Experiment: in `TieredCache.get_or_compute`, disable the in-flight check (`if key in self._inflight:` → `if False:`) and run the tests. `test_concurrent_misses_make_one_upstream_call` fails with 25 upstream calls for one question: a cache stampede.
+Experiment: in `TieredCache.get_or_compute`, disable the in-flight check (`if key in self._inflight:` → `if False:`) and run the tests. `test_concurrent_misses_make_one_upstream_call` fails. All 25 concurrent requests for the same question now start their own model call (a cache stampede), and the shared in-flight bookkeeping trips over itself with a `KeyError`. Both show why concurrent misses need exactly one owner.
 
 **Next:** Part 3 puts the lessons together: complete systems, starting with the flagship platform, where every pattern from Parts 1 and 2 meets the others.
