@@ -51,13 +51,32 @@ def add_message(content):
 ---
 
 ## How is this solved in production?
-Production systems model state using **immutable schemas** and **functional state updates**.
-Instead of mutating state in-place:
-1. State is represented as a structured object (e.g., using Pydantic or TypedDict).
-2. Updates are made by producing a *new copy* of the state (using deep copies or state delta transitions).
-3. Every state transition is recorded as a new version or step, creating an immutable ledger of the agent's run history.
-4. Thread-safe locks or database transaction boundaries are used to coordinate concurrent runs.
-5. The store never hands out its own objects. A frozen dataclass stops `state.execution_plan = [...]` but not `state.execution_plan.append(...)`, so `StateStore` returns deep copies. The stricter alternative is tuples and read-only mappings, so a mutation raises an error instead of being silently ignored.
+Production systems treat state as a sequence of versions that are never edited. `StateStore` in `example.py` shows the whole pattern.
+
+**1. A typed, frozen snapshot.** `AgentState` is a frozen dataclass holding the messages, the current task, the execution plan, metadata and a `version` number. Every field is declared, so a typo is an error rather than a new key, and the state serialises cleanly when it has to be stored (Lesson 15).
+
+**2. Every update creates a new version.** `update(**changes)` never edits the current state. It builds a new `AgentState` from the old one plus the changes, and bumps the version:
+```python
+with self._lock:                                      # one writer at a time
+    execution_plan = self._current_state.execution_plan
+    if "execution_plan" in kwargs:
+        execution_plan = copy.deepcopy(kwargs["execution_plan"])  # the caller keeps its own list
+    new_state = AgentState(..., execution_plan=execution_plan,
+                           version=self._current_state.version + 1)
+    self._current_state = new_state
+    self._history.append(new_state)                   # every version is kept
+    return copy.deepcopy(new_state)                   # callers never get the stored object
+```
+
+**3. Metadata merges instead of overwriting.** `update(metadata={"tokens": 1200})` adds or replaces that one key and keeps the rest. Replacing the whole dict would silently drop what another step wrote; Lesson 13 comes back to this as merge reducers.
+
+**4. The history is the audit trail.** Every version stays in the history, so "what did the agent know at step 3?" has an exact answer. `get_history()` returns copies of all of them.
+
+**5. Rollback is a new version, not an erasure.** `rollback(1)` creates version 3 with version 1's content. Version 2 stays in the history, so the record shows that the agent took a wrong path and when it came back.
+
+**6. One lock around every read-modify-write.** Without it, two threads both read version 7 and both write version 8, and one update is lost. A test runs 50 threads making 500 updates and checks that the final version is exactly 500. Across processes, the lock becomes a database transaction or a version check (Lessons 18 and 19).
+
+**7. The store never hands out its own objects.** A frozen dataclass stops `state.execution_plan = [...]` but not `state.execution_plan.append(...)`, so `StateStore` returns deep copies. The stricter alternative is tuples and read-only mappings, so a mutation raises an error instead of being silently ignored.
 
 ---
 

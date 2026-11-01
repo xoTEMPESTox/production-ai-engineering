@@ -54,6 +54,21 @@ def build_prompt(history, query):
 ---
 
 ## How is this solved in production?
+This is the longest lesson in Part 1 because it covers both kinds of memory. Steps 1–4 are long-term memory as retrieval (the RAG part), step 5 is what may be written into memory, and step 6 is short-term memory. Step 6 also makes sense on its own, so you can come back to it later.
+
+Terms used below, in plain words:
+
+| Term | Meaning |
+|---|---|
+| chunk | a piece of a document small enough to search and cite: here, one section or part of one |
+| embedding (vector) | a list of numbers representing a text's meaning; texts with similar meanings get nearby vectors |
+| BM25 | the standard keyword score: query words that are rare overall but frequent in a short chunk score highest |
+| RRF (reciprocal rank fusion) | merges ranked lists by adding `1 / (60 + rank)` from each list, so scores on different scales never need comparing |
+| HNSW | a common approximate-nearest-neighbour index: finds similar vectors quickly without comparing against every one |
+| reranking | a second, slower model that re-scores only the top 20–50 hits |
+| pgvector | the PostgreSQL extension that stores vectors and searches them in SQL |
+| compaction | shrinking the conversation so it fits the token budget |
+
 Step by step through `example.py`:
 
 **1. Chunk by structure and keep the metadata.** A heading closes the current chunk and labels the chunks under it. Lines are packed up to `max_words`. Each chunk gets a stable ID (`billing-faq#0`) and its section, and the heading is indexed together with the body, so a query for "refunds" finds a section whose body only says "refunded".
